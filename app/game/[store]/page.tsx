@@ -332,8 +332,41 @@ const DungeonBg = memo(function DungeonBg({ color, glow }: { color: string; glow
   );
 });
 
+// ── Stat helpers (deterministic from npc id) ─────────────
+const NPC_ROLES      = ["Coyote Dancer","Go-Go Dancer","Bar Girl","VIP Hostess","Cocktail Waitress"];
+const NPC_HOMETOWNS  = ["Korat","Chiang Mai","Bangkok","Pattaya","Khon Kaen","Udon Thani","Surin"];
+
+function npcHash(id: string, seed: number): number {
+  let h = seed + 7;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff;
+  return h;
+}
+const npcStat     = (id: string, s: number) => (npcHash(id, s) % 7) + 4;
+const npcLevel    = (id: string)            => (npcHash(id, 3) % 20) + 5;
+const npcRole     = (id: string)            => NPC_ROLES[npcHash(id, 11) % NPC_ROLES.length];
+const npcHometown = (id: string)            => NPC_HOMETOWNS[npcHash(id, 17) % NPC_HOMETOWNS.length];
+
+// ── Profile stat bar ─────────────────────────────────────
+function ProfileStatBar({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <span style={{ fontSize: "9px", color: "#C080A0", width: 52, textAlign: "right", flexShrink: 0, letterSpacing: "0.04em" }}>
+        {label}
+      </span>
+      <div style={{ flex: 1, height: 8, background: "#1a0010", border: "1px solid #2a1020", overflow: "hidden", position: "relative" }}>
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0,
+          width: `${(value / 10) * 100}%`,
+          background: `linear-gradient(90deg, ${color}, ${color}bb)`,
+          boxShadow: `0 0 6px ${color}99`,
+        }} />
+      </div>
+    </div>
+  );
+}
+
 // ── Main page ────────────────────────────────────────────
-type Phase = "browse" | "talking" | "guess" | "reveal" | "complete";
+type Phase = "browse" | "profile" | "talking" | "guess" | "reveal" | "complete";
 
 export default function StorePage({ params }: { params: Promise<{ store: string }> }) {
   const { store }   = use(params);
@@ -355,6 +388,7 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
   const [revealCorrect, setRevealCorrect]   = useState<boolean | null>(null);
   const [dialogueClosed, setDialogueClosed] = useState(false);
   const [hintClosed, setHintClosed]         = useState(false);
+  const [profileIdx, setProfileIdx]         = useState(0);
 
   if (!meta) {
     return (
@@ -440,7 +474,7 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
                 walking={phase === "browse" && !doneNPCs.has(i)}
                 walkIndex={i}
                 onClick={() => {
-                  if (phase === "browse" && !doneNPCs.has(i)) { setHintClosed(true); startTalking(i); }
+                  if (phase === "browse" && !doneNPCs.has(i)) { setHintClosed(true); setProfileIdx(i); setPhase("profile"); }
                   else if ((phase === "talking" || phase === "guess") && npcIndex === i && dialogueClosed) setDialogueClosed(false);
                 }}
               />
@@ -452,6 +486,77 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
         <div className="absolute" style={{ bottom: "8%", left: 64, width: 48, height: 64 }}>
           <Image src={charImg} alt="player" fill className="object-contain pixelated" />
         </div>
+
+        {/* ── Profile card overlay ── */}
+        {phase === "profile" && npcs[profileIdx] && (() => {
+          const npc = npcs[profileIdx];
+          return (
+            <div className="absolute inset-0 z-30 flex items-center justify-center"
+              style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(3px)" }}>
+              <div style={{
+                width: "min(340px, 88vw)",
+                background: "linear-gradient(180deg, #1a0010, #0c0008)",
+                border: `3px solid ${npc.outfitColor}`,
+                boxShadow: `0 0 40px ${npc.outfitColor}55, 0 0 80px ${npc.outfitColor}22`,
+                display: "flex", flexDirection: "column", alignItems: "center",
+                padding: "28px 24px 20px", gap: 12,
+                fontFamily: "'Press Start 2P', monospace",
+              }}>
+                {/* Portrait — scaled up */}
+                <div style={{ transform: "scale(1.45)", transformOrigin: "top center", marginBottom: 56 }}>
+                  <NPCPortrait npc={npc} speaking={false} />
+                </div>
+
+                {/* Name */}
+                <div style={{ color: "#FAC335", fontSize: "clamp(14px, 4vw, 20px)", letterSpacing: "0.15em", textShadow: "0 0 10px #FAC335, 0 0 24px #FF8C00", textAlign: "center" }}>
+                  {npc.name.toUpperCase()}
+                </div>
+
+                {/* Role */}
+                <div style={{ color: "#FF69B4", fontSize: "10px", letterSpacing: "0.12em" }}>
+                  {npcRole(npc.id)}
+                </div>
+
+                {/* Badges */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+                  <span style={{ fontSize: "8px", padding: "3px 8px", background: "#200010", border: "1px solid #482D40", color: "#C080A0" }}>
+                    LV.{npcLevel(npc.id)}
+                  </span>
+                  <span style={{ fontSize: "8px", padding: "3px 8px", background: "#200010", border: "1px solid #482D40", color: "#C080A0" }}>
+                    {npcHometown(npc.id).toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: "8px", padding: "3px 8px", background: "#DD192F", color: "#fff", boxShadow: "0 0 6px #DD192F88", fontFamily: "sans-serif" }}>
+                    🔥 HOT
+                  </span>
+                </div>
+
+                {/* Divider */}
+                <div style={{ width: "100%", height: 1, background: "#482D40" }} />
+
+                {/* Stat bars */}
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+                  <ProfileStatBar label="CHARM"  value={npcStat(npc.id, 1)} color="#DD192F" />
+                  <ProfileStatBar label="DANCE"  value={npcStat(npc.id, 2)} color="#A10535" />
+                  <ProfileStatBar label="HUSTLE" value={npcStat(npc.id, 3)} color="#FAC335" />
+                </div>
+
+                {/* Buttons */}
+                <div style={{ display: "flex", gap: 10, width: "100%", marginTop: 4 }}>
+                  <button
+                    onClick={() => setPhase("browse")}
+                    style={{ flex: 1, padding: "10px", background: "#0c0008", border: "2px solid #482D40", color: "#8A5070", fontSize: "9px", cursor: "pointer", letterSpacing: "0.12em", fontFamily: "'Press Start 2P', monospace" }}>
+                    ✕ CLOSE
+                  </button>
+                  <button
+                    onClick={() => startTalking(profileIdx)}
+                    style={{ flex: 2, padding: "10px", background: "linear-gradient(180deg, #4A043A, #100008)", border: "2px solid #C060FF", color: "#E8B0FF", fontSize: "9px", cursor: "pointer", boxShadow: "0 0 14px rgba(192,96,255,0.35)", textShadow: "0 0 6px #C060FF", letterSpacing: "0.12em", fontFamily: "'Press Start 2P', monospace" }}>
+                    ▶ TALK
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Browse hint */}
         {phase === "browse" && !hintClosed && (

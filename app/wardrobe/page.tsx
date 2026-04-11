@@ -218,13 +218,9 @@ export default function WardrobePage() {
       </div>
 
       {/* ── MAIN AREA ── */}
-      {/*
-        Mobile  (<md): stacked — sprite 40% viewport height, info below
-        Desktop (≥md): side by side — sprite 40vw, info 60vw
-      */}
       <div className="relative z-10 flex-1 flex flex-col md:flex-row min-h-0">
 
-        {/* ── SPRITE — 40% column, character naturally sized inside ── */}
+        {/* ── SPRITE — 40% column ── */}
         <div className="shrink-0 flex items-center justify-center w-full h-48 md:w-[40%] md:h-auto">
           <div
             key={animKey}
@@ -339,7 +335,7 @@ export default function WardrobePage() {
             }}
           />
 
-          {/* Skill bars — 2×2 on md+, 1-col on mobile */}
+          {/* Skill bars */}
           <div
             className="grid gap-y-2 md:gap-y-3"
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(4px, 1vw, 16px)' }}
@@ -362,8 +358,7 @@ export default function WardrobePage() {
         }}
       >
         {/* Cards — scrollable on small screens */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 overflow-x-auto pb-1"
-             style={{ scrollbarWidth: 'none' }}>
+        <div className="flex items-center gap-2 md:gap-3 flex-1 overflow-x-auto pb-1 no-scrollbar">
           {characters.map((c, i) => {
             const isActive = i === activeIndex;
             const cardW    = 'clamp(68px, 8vw, 100px)';
