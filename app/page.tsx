@@ -141,15 +141,17 @@ export default function LandingPage() {
           <span style={{ color: "#FF69B4", textShadow: "4px 4px 0 #8B0057" }}>PLAZA</span>
         </div>
         
-        <div style={{ 
-            display: "inline-block", 
-            margin: "15px 0", 
-            padding: "6px 24px", 
-            background: "#FF69B4", 
-            color: "#000", 
-            fontSize: "20px", 
+        <div style={{
+            display: "inline-block",
+            margin: "15px 0",
+            padding: "6px clamp(10px, 4vw, 24px)",
+            background: "#FF69B4",
+            color: "#000",
+            fontSize: "clamp(10px, 3.5vw, 20px)",
             boxShadow: "3px 3px 0 #8B0057",
-            letterSpacing: "0.2em"
+            letterSpacing: "0.1em",
+            maxWidth: "90vw",
+            textAlign: "center",
         }}>
             WHO IS THE LADYBOY
         </div>
@@ -158,7 +160,11 @@ export default function LandingPage() {
       {/* ── CHARACTER LINEUP ── */}
       <div style={{
         display: "flex", alignItems: "flex-end", justifyContent: "center",
-        gap: "24px", padding: "20px 16px 0", flexShrink: 0,
+        gap: "clamp(6px, 2vw, 24px)",
+        padding: "20px 16px 0",
+        flexShrink: 0,
+        transform: "scale(clamp(0.6, 6vw, 1))",
+        transformOrigin: "center bottom",
       }}>
         <Bouncer />
         {DANCERS.map((d, i) => <Dancer key={i} {...d} />)}

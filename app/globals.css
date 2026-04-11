@@ -43,3 +43,88 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE OVERRIDES
+   These use !important to override the inline styles that
+   the game pages apply, without rewriting those components.
+───────────────────────────────────────────────────────── */
+
+/* ── Store dialogue: stack portrait above text on mobile ── */
+@media (max-width: 639px) {
+  /* Flip the portrait+speech row to column */
+  .dialogue-content {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+
+  /* Portrait panel becomes a compact horizontal strip */
+  .portrait-panel {
+    width: 100% !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 8px 14px !important;
+    gap: 14px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(155,89,182,0.25) !important;
+    max-height: 110px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Scale down the pixel portrait to fit the strip */
+  .portrait-panel .npc-portrait-bob {
+    transform: scale(0.48) !important;
+    transform-origin: top left !important;
+    width: 46px !important;
+    height: 46px !important;
+    flex-shrink: 0 !important;
+    animation: none !important;
+  }
+
+  /* Clue boxes inside portrait on mobile */
+  .portrait-panel > div:last-child {
+    font-size: 9px !important;
+  }
+
+  /* Speech panel: tighter padding on mobile */
+  .speech-panel {
+    padding: 10px 12px !important;
+    gap: 10px !important;
+  }
+
+  /* Smaller dialogue text on mobile */
+  .dialogue-box p { font-size: 12px !important; }
+  .choice-btn     { padding: 10px 12px !important; font-size: 11px !important; }
+  .guess-btn      { padding: 14px 10px !important; font-size: 11px !important; }
+}
+
+/* ── Game store select: scale down store cards on small screens ── */
+@media (max-width: 639px) {
+  .store-node {
+    transform: translate(-50%, -50%) scale(0.75) !important;
+  }
+  /* Keep float animation but with scale baked in */
+  @keyframes storeFloatMobile {
+    0%,  100% { transform: translate(-50%, -50%) scale(0.75) translateY(0px);   }
+    50%        { transform: translate(-50%, -50%) scale(0.75) translateY(-5px);  }
+  }
+  .store-node { animation: storeFloatMobile 2.8s ease-in-out infinite !important; }
+}
+
+/* ── Landing page: prevent wide text from overflowing ── */
+@media (max-width: 639px) {
+  .coin-btn {
+    padding: 10px 16px !important;
+    gap: 6px !important;
+  }
+  .coin-btn span {
+    font-size: 8px !important;
+    letter-spacing: 0.15em !important;
+  }
+}
+
+/* ── Wardrobe: ensure selection strip doesn't show scrollbar ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
