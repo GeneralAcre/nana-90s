@@ -81,6 +81,156 @@ function NPCPortrait({ npc, speaking }: { npc: NPC; speaking: boolean }) {
   );
 }
 
+// ── SVG pixel-art portrait for profile card ──────────────
+function NPCPortraitSVG({ npc }: { npc: NPC }) {
+  const skin = "#f4c896";
+  const hair = npc.hairColor;
+  const top  = npc.outfitColor;
+  return (
+    <svg viewBox="0 0 80 110" xmlns="http://www.w3.org/2000/svg"
+      style={{ width: "100%", height: "100%", imageRendering: "pixelated",
+               filter: `drop-shadow(0 0 14px ${top}55)` }}>
+      {/* Floor shadow */}
+      <ellipse cx="40" cy="107" rx="18" ry="3" fill="rgba(0,0,0,0.3)"/>
+
+      {/* Hair back */}
+      <rect x="18" y="6"  width="44" height="35" rx="3" fill={hair}/>
+      <rect x="14" y="22" width="8"  height="30" rx="2" fill={hair}/>
+      <rect x="58" y="22" width="8"  height="30" rx="2" fill={hair}/>
+      <rect x="16" y="50" width="6"  height="16" rx="2" fill={hair} opacity="0.7"/>
+      <rect x="58" y="50" width="6"  height="16" rx="2" fill={hair} opacity="0.7"/>
+
+      {/* Head */}
+      <rect x="22" y="8"  width="36" height="28" rx="5" fill={skin}/>
+
+      {/* Bangs */}
+      <rect x="20" y="4"  width="40" height="12" rx="3" fill={hair}/>
+      <rect x="22" y="12" width="10" height="5"  rx="2" fill={hair}/>
+      <rect x="48" y="12" width="10" height="5"  rx="2" fill={hair}/>
+
+      {/* Eyelashes */}
+      <rect x="26" y="17" width="10" height="1.5" fill={hair}/>
+      <rect x="44" y="17" width="10" height="1.5" fill={hair}/>
+
+      {/* Eyes */}
+      <rect x="28" y="18" width="6" height="5" rx="2" fill="#2a0225"/>
+      <rect x="46" y="18" width="6" height="5" rx="2" fill="#2a0225"/>
+      {/* Eye shine */}
+      <rect x="29" y="19" width="2" height="2" rx="1" fill="#fff" opacity="0.8"/>
+      <rect x="47" y="19" width="2" height="2" rx="1" fill="#fff" opacity="0.8"/>
+
+      {/* Blush */}
+      <ellipse cx="27" cy="26" rx="4" ry="2.5" fill="#DD192F" opacity="0.22"/>
+      <ellipse cx="53" cy="26" rx="4" ry="2.5" fill="#DD192F" opacity="0.22"/>
+
+      {/* Mouth */}
+      <rect x="34" y="28" width="12" height="4" rx="2" fill="#DD192F"/>
+      <rect x="37" y="29" width="6"  height="1.5" rx="1" fill="#ff6080" opacity="0.7"/>
+
+      {/* Earring dot */}
+      <circle cx="22" cy="26" r="2" fill="#FAC335"/>
+      <circle cx="58" cy="26" r="2" fill="#FAC335"/>
+
+      {/* Neck */}
+      <rect x="34" y="36" width="12" height="8" fill={skin}/>
+
+      {/* Crop top */}
+      <rect x="22" y="42" width="36" height="18" rx="3" fill={top}/>
+      {/* Shine stripe */}
+      <rect x="28" y="44" width="24" height="5" rx="1" fill="rgba(255,255,255,0.18)"/>
+
+      {/* Arms */}
+      <rect x="12" y="43" width="12" height="6" rx="2" fill={skin}/>
+      <rect x="56" y="43" width="12" height="6" rx="2" fill={skin}/>
+      <rect x="8"  y="47" width="8"  height="16" rx="2" fill={skin}/>
+      <rect x="64" y="47" width="8"  height="16" rx="2" fill={skin}/>
+      {/* Hands */}
+      <rect x="8"  y="61" width="8" height="6" rx="2" fill={skin}/>
+      <rect x="64" y="61" width="8" height="6" rx="2" fill={skin}/>
+
+      {/* Short skirt */}
+      <rect x="20" y="58" width="40" height="15" rx="2" fill={top} opacity="0.8"/>
+      <rect x="22" y="60" width="14" height="11" fill="rgba(0,0,0,0.15)"/>
+
+      {/* Legs */}
+      <rect x="26" y="73" width="10" height="20" fill={skin}/>
+      <rect x="44" y="73" width="10" height="20" fill={skin}/>
+
+      {/* Platform boots */}
+      <rect x="23" y="91" width="15" height="8" rx="2" fill="#4A043A"/>
+      <rect x="42" y="91" width="15" height="8" rx="2" fill="#4A043A"/>
+      <rect x="27" y="97" width="6"  height="7" rx="1" fill="#4A043A"/>
+      <rect x="46" y="97" width="6"  height="7" rx="1" fill="#4A043A"/>
+
+      {/* Sparkle */}
+      <circle cx="15" cy="10" r="2" fill="#FAC335" opacity="0.7"/>
+    </svg>
+  );
+}
+
+// ── Small SVG sprite body for bar scene ──────────────────
+function NPCSpriteSmall({ npc, walking }: { npc: NPC; walking: boolean }) {
+  const skin = "#F5C5A0";
+  const hair = npc.hairColor;
+  const top  = npc.outfitColor;
+  return (
+    <svg viewBox="0 0 32 56" xmlns="http://www.w3.org/2000/svg"
+      style={{ width: 32, height: 56, imageRendering: "pixelated", overflow: "visible" }}>
+      {/* Hair back */}
+      <rect x="4"  y="1"  width="24" height="16" rx="2" fill={hair}/>
+      <rect x="2"  y="7"  width="4"  height="14" rx="1" fill={hair}/>
+      <rect x="26" y="7"  width="4"  height="14" rx="1" fill={hair}/>
+      {/* Head */}
+      <rect x="6"  y="3"  width="20" height="14" rx="3" fill={skin}/>
+      {/* Bangs */}
+      <rect x="5"  y="1"  width="22" height="6"  rx="2" fill={hair}/>
+      <rect x="6"  y="6"  width="6"  height="3"  rx="1" fill={hair}/>
+      <rect x="20" y="6"  width="6"  height="3"  rx="1" fill={hair}/>
+      {/* Eyes */}
+      <rect x="9"  y="8"  width="4"  height="3"  rx="1" fill="#2a0225"/>
+      <rect x="19" y="8"  width="4"  height="3"  rx="1" fill="#2a0225"/>
+      <rect x="10" y="9"  width="1.5" height="1.5" rx="0.5" fill="#fff" opacity="0.8"/>
+      <rect x="20" y="9"  width="1.5" height="1.5" rx="0.5" fill="#fff" opacity="0.8"/>
+      {/* Blush */}
+      <ellipse cx="8"  cy="13" rx="2" ry="1.5" fill="#DD192F" opacity="0.2"/>
+      <ellipse cx="24" cy="13" rx="2" ry="1.5" fill="#DD192F" opacity="0.2"/>
+      {/* Mouth */}
+      <rect x="13" y="13" width="6"  height="2"  rx="1" fill="#DD192F"/>
+      {/* Neck */}
+      <rect x="13" y="17" width="6"  height="4"  fill={skin}/>
+      {/* Body */}
+      <rect x="5"  y="20" width="22" height="14" rx="2" fill={top}/>
+      <rect x="8"  y="22" width="16" height="4"  rx="1" fill="rgba(255,255,255,0.15)"/>
+      {/* Arms */}
+      <rect x="0"  y="21" width="6"  height="4"  rx="1" fill={skin}/>
+      <rect x="26" y="21" width="6"  height="4"  rx="1" fill={skin}/>
+      <rect x="0"  y="24" width="4"  height="8"  rx="1" fill={skin}/>
+      <rect x="28" y="24" width="4"  height="8"  rx="1" fill={skin}/>
+      {/* Skirt */}
+      <rect x="4"  y="32" width="24" height="9"  rx="1" fill={top} opacity="0.8"/>
+      {/* Left leg */}
+      <g>
+        <rect x="7" y="41" width="7" height="9" rx="1" fill={skin}/>
+        {walking && (
+          <animateTransform attributeName="transform" type="rotate"
+            values="-6 10.5 41;6 10.5 41;-6 10.5 41" dur="0.4s" repeatCount="indefinite"/>
+        )}
+      </g>
+      {/* Right leg */}
+      <g>
+        <rect x="18" y="41" width="7" height="9" rx="1" fill={skin}/>
+        {walking && (
+          <animateTransform attributeName="transform" type="rotate"
+            values="6 21.5 41;-6 21.5 41;6 21.5 41" dur="0.4s" repeatCount="indefinite"/>
+        )}
+      </g>
+      {/* Shoes */}
+      <rect x="6"  y="48" width="9"  height="5" rx="1" fill="#4A043A"/>
+      <rect x="17" y="48" width="9"  height="5" rx="1" fill="#4A043A"/>
+    </svg>
+  );
+}
+
 // ── Small NPC sprite for the bar scene ───────────────────
 function NPCSprite({
   npc, active, done, walking, walkIndex, onClick,
@@ -92,7 +242,6 @@ function NPCSprite({
   const offset  = `${walkIndex * -2.8}s`;
 
   return (
-    // Outer: XY path
     <div
       className={walking ? `npc-path-${pathIdx}` : ""}
       style={walking ? { animationDelay: offset, position: "relative", zIndex: 2 } : { position: "relative", zIndex: 2 }}
@@ -103,40 +252,24 @@ function NPCSprite({
         className="flex flex-col items-center gap-1 transition-all"
         style={{ opacity: done ? 0.4 : 1, cursor: done ? "default" : "pointer", background: "none", border: "none", padding: 0 }}
       >
-        {/* Face direction div */}
         <div
           className={walking ? `npc-face-${pathIdx}` : "pixel-bob"}
           style={{
-            filter: active ? `drop-shadow(0 0 12px ${npc.outfitColor})` : "none",
+            filter: active ? `drop-shadow(0 0 14px ${npc.outfitColor})` : "none",
             ...(walking ? { animationDelay: offset } : {}),
           }}
         >
-          {/* Walk bob wrapper */}
           <div className={walking ? "walk-bob" : ""} style={{ position: "relative" }}>
-            {/* head */}
-            <div style={{ width: 20, height: 20, background: "#F5C5A0", border: "2px solid #000", margin: "0 auto", position: "relative" }}>
-              <div style={{ position: "absolute", top: 6, left: 4, width: 3, height: 3, background: "#000" }} />
-              <div style={{ position: "absolute", top: 6, right: 4, width: 3, height: 3, background: "#000" }} />
-              <div style={{ position: "absolute", bottom: 3, left: "50%", transform: "translateX(-50%)", width: 6, height: 2, background: "#c0605a" }} />
-            </div>
-            {/* hair */}
-            <div style={{ position: "absolute", top: -6, left: -2, width: 24, height: 10, background: npc.hairColor, border: "2px solid #000", borderBottom: "none" }} />
-            {/* body */}
-            <div style={{ width: 24, height: 30, background: npc.outfitColor, border: "2px solid #000", margin: "0 auto" }} />
-            {/* legs */}
-            <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
-              <div className={walking ? "leg-walk-l" : ""} style={{ width: 8, height: 14, background: npc.outfitColor, border: "2px solid #000", transformOrigin: "top center" }} />
-              <div className={walking ? "leg-walk-r" : ""} style={{ width: 8, height: 14, background: npc.outfitColor, border: "2px solid #000", transformOrigin: "top center" }} />
-            </div>
+            <NPCSpriteSmall npc={npc} walking={walking} />
             {/* TALK hint */}
             {!done && !active && (
-              <div className="talk-bounce absolute -top-6 left-1/2 -translate-x-1/2" style={{ fontSize: "8px", color: "#FFE44D", whiteSpace: "nowrap", textShadow: "0 0 4px #FFB800" }}>
+              <div className="talk-bounce absolute -top-6 left-1/2 -translate-x-1/2"
+                style={{ fontSize: "8px", color: "#FFE44D", whiteSpace: "nowrap", textShadow: "0 0 4px #FFB800" }}>
                 TALK
               </div>
             )}
           </div>
         </div>
-        {/* Name outside the flip div */}
         <span style={{ fontSize: "7px", color: active ? "#FFE44D" : "#E0C8FF", textShadow: active ? "0 0 6px #FFB800" : "none", letterSpacing: "0.1em" }}>
           {npc.name.toUpperCase()}
         </span>
@@ -502,9 +635,9 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
                 padding: "28px 24px 20px", gap: 12,
                 fontFamily: "'Press Start 2P', monospace",
               }}>
-                {/* Portrait — scaled up */}
-                <div style={{ transform: "scale(1.45)", transformOrigin: "top center", marginBottom: 56 }}>
-                  <NPCPortrait npc={npc} speaking={false} />
+                {/* SVG pixel-art portrait */}
+                <div style={{ width: 150, height: 206 }}>
+                  <NPCPortraitSVG npc={npc} />
                 </div>
 
                 {/* Name */}
