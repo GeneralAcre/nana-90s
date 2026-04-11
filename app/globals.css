@@ -1,4 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import "tailwindcss";
+
+@keyframes charEnter {
+  0%   { transform: translateY(80px) scale(0.78); opacity: 0; }
+  100% { transform: translateY(0px)  scale(1);    opacity: 1; }
+}
+@keyframes floatIdle {
+  0%,  100% { transform: translateY(0px);   }
+  50%        { transform: translateY(-14px); }
+}
+.scanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+}
 
 :root {
   --background: #ffffff;
