@@ -3,110 +3,294 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useGame } from '../context/GameContext';
 
+const characters = [
+  {
+    name: 'George',
+    color: '#DD192F',
+    img: '/characters/George.png',
+    age: 28,
+    occupation: 'Arcade Mechanic',
+    hometown: 'Bangkok',
+    skills: 'High-Speed Reflexes, Electronics Master',
+    story:
+      "A skilled arcade mechanic whose reflexes were forged in the fiery crucible of late-night competition. He's on a mission to uncover the truth behind a glitch in the city's power grid. His mantra: \"Fix it, or it will break you.\"",
+  },
+  {
+    name: 'Lee',
+    color: '#A10535',
+    img: '/characters/Lee.png',
+    age: 32,
+    occupation: 'Street Photographer',
+    hometown: 'Chiang Mai',
+    skills: 'Sharp Eye, Shadow Movement',
+    story:
+      "A wandering photographer with an eye sharper than any lens. Lee drifts through neon-lit alleys capturing secrets nobody else dares to see. He moves like a shadow and disappears before the flash fades.",
+  },
+  {
+    name: 'Mazatada',
+    color: '#4A043A',
+    img: '/characters/Mazatada.png',
+    age: 35,
+    occupation: 'Underground Trader',
+    hometown: 'Pattaya',
+    skills: 'Negotiation, Black Market Intel',
+    story:
+      "An underground trader who knows every back-alley deal in the city. Mazatada has survived by keeping his friends close and his secrets closer. Nobody crosses him twice.",
+  },
+  {
+    name: 'Somchai',
+    color: '#C17F24',
+    img: '/characters/Somchai.png',
+    age: 24,
+    occupation: 'Muay Thai Fighter',
+    hometown: 'Korat',
+    skills: 'Iron Fists, Street Instinct',
+    story:
+      "A rising Muay Thai fighter who left the ring to fight for something real. Somchai came to the plaza looking for his missing brother and found a city full of lies. He hits first and asks questions later.",
+  },
+];
+
 export default function WardrobePage() {
   const { suitColor, setSuitColor } = useGame();
-  
-  const options = [
-    { name: 'George', color: '#DD192F', img: '/characters/george.png' },
-    { name: 'Lee', color: '#A10535', img: '/characters/lee.png' },
-    { name: 'Mazatada', color: '#4A043A', img: '/characters/mazatada.png' },
-    { name: 'Somchai', color: '#FAC335', img: '/characters/somchai.png' },
-  ];
 
-  const selectedCharacter = options.find(opt => opt.color === suitColor) || options[0];
+  const selectedIndex = characters.findIndex((c) => c.color === suitColor);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+  const character = characters[activeIndex];
+
+  const prev = () => {
+    const i = (activeIndex - 1 + characters.length) % characters.length;
+    setSuitColor(characters[i].color);
+  };
+  const next = () => {
+    const i = (activeIndex + 1) % characters.length;
+    setSuitColor(characters[i].color);
+  };
 
   return (
-    <div className="relative h-screen w-screen p-8 flex flex-col justify-between select-none">
-      
-      {/* Top Navigation */}
-      <div className="z-30">
-        <Link href="/" className="pointer-events-auto inline-block hover:scale-110 transition-transform">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6"/>
-          </svg>
-        </Link>
+    <div
+      className="relative h-screen w-screen overflow-hidden select-none flex flex-col"
+      style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+    >
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/nana-plaza.png"
+          alt="Nana Plaza"
+          fill
+          className="object-cover pixelated"
+          priority
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      {/* --- SCALE & PLACEMENT CHANGES ARE HERE --- */}
-      {/* This is the new "Center Section". 
-        It is full width and spans from left edge to right edge. 
-        `justify-between` forces the children into their respective 50% slots.
-      */}
-      <div className="flex flex-1 items-center justify-between w-full mx-auto px-16 -mt-10">
-        
-        {/*
-          Left Box (Character Placement)
-          `w-1/2` (w-50%) takes up the entire left half of the screen.
-          `flex justify-center` centers the small original portrait image inside this half-screen area.
-        */}
-        <div className="w-1/2 flex justify-center items-center">
-           {/* This inner container holds the portrait at its original scale */}
-           <div className="relative w-64 h-80 transition-all duration-300 transform">
-              <Image 
-                src={selectedCharacter.img} 
-                alt={selectedCharacter.name}
-                fill
-                className="object-contain pixelated"
-                priority
-              />
-           </div>
+      {/* ── TOP BAR ── */}
+      <div className="relative z-10 flex items-center justify-center pt-5 px-6">
+        {/* X Button */}
+        <Link
+          href="/"
+          className="absolute left-6 top-5 w-10 h-10 flex items-center justify-center border-2 border-red-500 bg-red-800/80 text-red-300 font-black text-lg hover:bg-red-600 transition-colors"
+          style={{ imageRendering: 'pixelated' }}
+        >
+          ✕
+        </Link>
+
+        {/* Neon Title */}
+        <h1
+          className="text-4xl md:text-5xl font-black tracking-widest uppercase text-center"
+          style={{
+            color: '#FFE44D',
+            textShadow:
+              '0 0 8px #FFE44D, 0 0 20px #FFB800, 0 0 40px #FF8C00, 2px 2px 0 #7A3A00',
+            letterSpacing: '0.15em',
+          }}
+        >
+          NANA PLAZA
+        </h1>
+      </div>
+
+      {/* ── MAIN CONTENT ── */}
+      <div className="relative z-10 flex flex-1 items-center justify-center gap-8 px-8 py-4">
+
+        {/* LEFT — Portrait Frame */}
+        <div className="flex flex-col items-center gap-3 shrink-0">
+          {/* Outer border frame */}
+          <div
+            className="relative p-2"
+            style={{
+              border: '4px solid #8B6914',
+              boxShadow: '0 0 0 2px #4A2E00, inset 0 0 0 2px #4A2E00, 0 4px 20px rgba(0,0,0,0.8)',
+              background: 'linear-gradient(145deg, #5C3A00, #3A2000)',
+            }}
+          >
+            <div
+              className="relative"
+              style={{
+                border: '3px solid #FFE44D',
+                boxShadow: '0 0 12px rgba(255,228,77,0.4), inset 0 0 8px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div className="relative w-52 h-64 bg-[#1a0a2e]">
+                <Image
+                  src={character.img}
+                  alt={character.name}
+                  fill
+                  className="object-contain pixelated"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* READY badge */}
+          <div
+            className="px-8 py-2 text-sm font-black tracking-widest"
+            style={{
+              background: 'linear-gradient(180deg, #1a4a1a, #0d2e0d)',
+              border: '3px solid #4CAF50',
+              color: '#6FE87A',
+              boxShadow: '0 0 10px rgba(76,175,80,0.5)',
+              textShadow: '0 0 6px #4CAF50',
+            }}
+          >
+            READY
+          </div>
         </div>
 
-        {/*
-          Right Box (Info Box Placement)
-          `w-1/2` (w-50%) aligns the start of the purple box to the exact middle of the screen.
-          `pl-16` provides consistent spacing from the middle, matching the image.
-        */}
-        <div className="w-1/2 pl-16 flex justify-start items-center">
-          {/* This is the scaled-up purple box.
-            Increased padding (`p-10`) and height (`min-h-[400px]`) make it a larger focal point.
-          */}
-          <div className="w-full max-w-xl bg-[#4A043A] rounded-2xl p-10 shadow-xl min-h-[400px] flex flex-col justify-center border border-white/10">
-            <h1 className="text-white text-5xl font-bold mb-6 uppercase italic tracking-tighter">
-              {selectedCharacter.name}
-            </h1>
-            <div className="text-white/90 space-y-6 font-mono text-xl leading-snug">
-              <p>SELECTING PLAYER...</p>
-              <p>NAME: {selectedCharacter.name.toUpperCase()}</p>
-              <p>STATUS: READY</p>
-            </div>
+        {/* RIGHT — Info Panel */}
+        <div
+          className="flex flex-col gap-3 w-full max-w-sm"
+          style={{
+            background: 'linear-gradient(160deg, rgba(20,5,40,0.95), rgba(10,2,25,0.97))',
+            border: '3px solid #8B4B8B',
+            boxShadow: '0 0 20px rgba(139,75,139,0.4), inset 0 0 30px rgba(0,0,0,0.5)',
+            padding: '20px',
+          }}
+        >
+          {/* Character Name */}
+          <h2
+            className="text-3xl font-black uppercase tracking-wider"
+            style={{
+              color: '#FFE44D',
+              textShadow: '0 0 8px #FFB800, 2px 2px 0 #7A3A00',
+            }}
+          >
+            {character.name.toUpperCase()}
+          </h2>
+
+          {/* Status */}
+          <div className="space-y-1 text-xs" style={{ color: '#E0C8FF' }}>
+            <p style={{ color: '#FF9EFF' }}>◆ SELECTING PLAYER...</p>
+            <p>👤 NAME: <span style={{ color: '#FFE44D' }}>{character.name.toUpperCase()}</span></p>
+            <p>✔ STATUS: <span style={{ color: '#6FE87A' }}>READY</span></p>
+          </div>
+
+          {/* Divider */}
+          <div style={{ borderTop: '2px solid #8B4B8B', opacity: 0.6 }} />
+
+          {/* Details */}
+          <div className="space-y-1 text-xs" style={{ color: '#E0C8FF' }}>
+            <p
+              className="text-sm font-black tracking-widest mb-2"
+              style={{ color: '#FF9EFF', textShadow: '0 0 6px #FF6EFF' }}
+            >
+              DETAILS
+            </p>
+            <p>📅 AGE: <span style={{ color: '#FFE44D' }}>{character.age}</span></p>
+            <p>⚙ OCCUPATION: <span style={{ color: '#FFE44D' }}>{character.occupation.toUpperCase()}</span></p>
+            <p>📍 HOMETOWN: <span style={{ color: '#FFE44D' }}>{character.hometown.toUpperCase()}</span></p>
+            <p>⚡ SKILLS: <span style={{ color: '#FFE44D' }}>{character.skills.toUpperCase()}</span></p>
+          </div>
+
+          {/* Divider */}
+          <div style={{ borderTop: '2px solid #8B4B8B', opacity: 0.6 }} />
+
+          {/* Story */}
+          <div className="space-y-2">
+            <p
+              className="text-sm font-black tracking-widest"
+              style={{ color: '#FF9EFF', textShadow: '0 0 6px #FF6EFF' }}
+            >
+              STORY
+            </p>
+            <p
+              className="text-xs leading-relaxed"
+              style={{ color: '#C8A8E0', fontFamily: 'sans-serif', fontSize: '11px' }}
+            >
+              {character.story}
+            </p>
           </div>
         </div>
       </div>
-      {/* ---------------------------------------------- */}
 
-      {/* Bottom Section */}
-      <div className="z-30 flex items-end justify-between w-full max-w-6xl mx-auto pb-4 px-16">
-        
-        {/* Character Selection Buttons */}
-        <div className="flex gap-4 pointer-events-auto">
-          {options.map((opt) => (
-            <div key={opt.name} className="flex flex-col items-center gap-2">
+      {/* ── BOTTOM BAR ── */}
+      <div className="relative z-10 flex items-end justify-between px-8 pb-6">
+
+        {/* Character Selector */}
+        <div className="flex items-center gap-3">
+          {/* Left arrow */}
+          <button
+            onClick={prev}
+            className="text-white text-xl font-black hover:text-yellow-300 transition-colors px-1"
+            style={{ textShadow: '0 0 6px #FFE44D' }}
+          >
+            ◀
+          </button>
+
+          {characters.map((c, i) => (
+            <div key={c.name} className="flex flex-col items-center gap-1">
               <button
-                onClick={() => setSuitColor(opt.color)}
-                className={`w-20 h-20 transition-all transform border-2 relative overflow-hidden ${
-                  suitColor === opt.color ? 'border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.4)]' : 'border-transparent opacity-60'
-                }`}
-                style={{ backgroundColor: opt.color }}
+                onClick={() => setSuitColor(c.color)}
+                className="relative overflow-hidden transition-all duration-150"
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  border: i === activeIndex ? '3px solid #FFE44D' : '3px solid #555',
+                  boxShadow: i === activeIndex ? '0 0 14px rgba(255,228,77,0.7)' : 'none',
+                  transform: i === activeIndex ? 'scale(1.12)' : 'scale(1)',
+                  background: c.color,
+                  opacity: i === activeIndex ? 1 : 0.55,
+                }}
               >
-                <Image src={opt.img} alt={opt.name} fill className="object-cover scale-125" />
+                <Image src={c.img} alt={c.name} fill className="object-cover scale-125 pixelated" />
               </button>
-              <span className={`text-xs font-bold uppercase tracking-widest ${suitColor === opt.color ? 'text-white' : 'text-white/40'}`}>
-                {opt.name}
+              <span
+                className="text-xs font-black uppercase tracking-widest"
+                style={{
+                  color: i === activeIndex ? '#FFE44D' : '#888',
+                  textShadow: i === activeIndex ? '0 0 6px #FFB800' : 'none',
+                  fontSize: '9px',
+                }}
+              >
+                {c.name.toUpperCase()}
               </span>
             </div>
           ))}
+
+          {/* Right arrow */}
+          <button
+            onClick={next}
+            className="text-white text-xl font-black hover:text-yellow-300 transition-colors px-1"
+            style={{ textShadow: '0 0 6px #FFE44D' }}
+          >
+            ▶
+          </button>
         </div>
 
-        {/* Action Button */}
-        <div className="pointer-events-auto">
-          <Link 
-            href="/game" 
-            className="bg-[#d9d9d9] text-black px-12 py-4 text-2xl font-black uppercase hover:bg-white transition-all active:translate-y-1 shadow-[4px_4px_0px_#000]"
-          >
-            Start Game
-          </Link>
-        </div>
+        {/* START GAME button */}
+        <Link
+          href="/game"
+          className="px-8 py-3 text-base font-black uppercase tracking-widest transition-all hover:brightness-110 active:translate-y-0.5"
+          style={{
+            background: 'linear-gradient(180deg, #2a1a4a, #1a0a32)',
+            border: '4px solid #C060FF',
+            color: '#E8B0FF',
+            boxShadow: '0 0 16px rgba(192,96,255,0.5), 4px 4px 0 #0a0018',
+            textShadow: '0 0 8px #C060FF',
+          }}
+        >
+          START GAME
+        </Link>
       </div>
 
       <style jsx global>{`
@@ -114,6 +298,7 @@ export default function WardrobePage() {
           image-rendering: pixelated;
           image-rendering: crisp-edges;
         }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
       `}</style>
     </div>
   );
