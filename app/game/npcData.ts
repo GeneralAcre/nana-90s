@@ -23,7 +23,7 @@ export const storeNPCs: Record<string, NPC[]> = {
   playboy: [
     {
       id: "nong",
-      name: "Nong",
+      name: "Nuclear",
       isLadyboy: false,
       outfitColor: "#FF69B4",
       hairColor: "#1a0a00",
