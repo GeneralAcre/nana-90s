@@ -230,16 +230,14 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── STAGE INFO ── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      {/* ── STAGE INFO + BUTTON ── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
         <div style={{ color: "#9B59B655", fontSize: "7px", letterSpacing: "0.4em" }}>◆ SUKHUMVIT SOI 4, BANGKOK ◆</div>
         <div style={{ color: "#FFE44D55", fontSize: "7px", border: "1px solid #FFE44D22", padding: "4px 14px" }}>STAGE 01 — ENTER THE BAR</div>
-      </div>
 
-      {/* ── BUTTON ── */}
-      <div style={{ textAlign: "center", padding: "4px 0 24px" }}>
-        <Link href="/wardrobe" style={{ textDecoration: "none" }}>
-          <div className="coin-btn" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "12px 32px", background: "rgba(0,0,0,0.85)", border: "3px solid #FFE44D", boxShadow: "4px 4px 0 #7a5800", cursor: "pointer" }}>
+        {/* ── BUTTON — centred in the flex gap so it sits well above the footer ── */}
+        <Link href="/wardrobe" style={{ textDecoration: "none", marginTop: 8 }}>
+          <div className="coin-btn" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", background: "rgba(0,0,0,0.85)", border: "3px solid #FFE44D", boxShadow: "4px 4px 0 #7a5800", cursor: "pointer" }}>
             <span style={{ color: "#FFE44D", fontSize: "10px", letterSpacing: "0.3em" }}>฿ INSERT COIN</span>
             <span style={{ color: "#FF69B4", fontSize: "10px", letterSpacing: "0.3em" }}><Blink>&amp; PRESS START</Blink></span>
           </div>

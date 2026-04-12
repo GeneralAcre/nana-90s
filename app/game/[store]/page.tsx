@@ -606,7 +606,7 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden select-none flex flex-col"
+    <div className="relative w-screen h-dvh overflow-hidden select-none flex flex-col"
       style={{ fontFamily: "'Press Start 2P','Courier New',monospace" }}>
       <DungeonBg color={meta.color} glow={meta.glow} />
 
@@ -642,7 +642,7 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
 
         {/* NPCs on dance floor */}
         <div className="absolute left-0 right-0" style={{ top: "38%" }}>
-          <div className="flex items-end justify-around px-20">
+          <div className="npc-lineup flex items-end justify-around px-20">
             {npcs.map((npc, i) => (
               <NPCSprite
                 key={npc.id}
@@ -738,8 +738,8 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
 
         {/* Browse hint */}
         {phase === "browse" && !hintClosed && (
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-5 py-3"
-            style={{ background: "#0d0020dd", border: `2px solid ${meta.color}`, boxShadow: `0 0 14px ${meta.color}44`, whiteSpace: "nowrap" }}>
+          <div className="browse-hint absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-5 py-3"
+            style={{ background: "#0d0020dd", border: `2px solid ${meta.color}`, boxShadow: `0 0 14px ${meta.color}44` }}>
             <p style={{ color: "#E0C8FF", fontSize: "9px", letterSpacing: "0.08em" }}>
               {doneNPCs.size === 0 ? "▲ CLICK A GIRL TO TALK TO HER" : `${npcs.length - doneNPCs.size} GIRL${npcs.length - doneNPCs.size !== 1 ? "S" : ""} REMAINING — CHOOSE WISELY`}
             </p>
@@ -749,8 +749,8 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
 
         {/* Resume hint */}
         {(phase === "talking" || phase === "guess") && dialogueClosed && currentNPC && (
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2"
-            style={{ background: "#0d0020dd", border: `2px solid ${currentNPC.outfitColor}`, whiteSpace: "nowrap" }}>
+          <div className="resume-hint absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2"
+            style={{ background: "#0d0020dd", border: `2px solid ${currentNPC.outfitColor}` }}>
             <span style={{ color: currentNPC.outfitColor, fontSize: "8px" }}>▶ CLICK {currentNPC.name.toUpperCase()} TO CONTINUE</span>
           </div>
         )}

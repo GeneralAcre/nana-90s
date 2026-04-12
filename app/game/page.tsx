@@ -235,7 +235,7 @@ export default function GamePage() {
   return (
     <>
       <div
-        className="relative w-screen h-screen overflow-hidden select-none"
+        className="relative w-screen h-dvh overflow-hidden select-none"
         style={{ fontFamily: "'Press Start 2P', monospace", background: "#0a0006" }}
       >
         {/* ── BACKGROUND ──────────────────────────── */}
@@ -296,7 +296,7 @@ export default function GamePage() {
               borderRight: "none",
             }}
           >
-            <span style={{
+            <span className="game-select-title" style={{
               color:      P.gold,
               fontSize:   "13px",
               letterSpacing: "0.28em",
@@ -325,7 +325,7 @@ export default function GamePage() {
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               style={{ opacity: 0.04 }}
             >
-              <span style={{ fontSize: "160px", color: P.gold, fontWeight: 900 }}>
+              <span className="floor-watermark" style={{ fontSize: "160px", color: P.gold, fontWeight: 900 }}>
                 {activeFloor}F
               </span>
             </div>

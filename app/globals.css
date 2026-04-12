@@ -44,88 +44,208 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
    RESPONSIVE OVERRIDES
-   These use !important to override the inline styles that
-   the game pages apply, without rewriting those components.
-───────────────────────────────────────────────────────── */
+   Use !important to punch through inline styles without
+   rewriting every component.
+═══════════════════════════════════════════════════════════ */
 
-/* ── Store dialogue: stack portrait above text on mobile ── */
-@media (max-width: 639px) {
-  /* Flip the portrait+speech row to column */
-  .dialogue-content {
-    flex-direction: column !important;
-    overflow-y: auto !important;
-  }
+/* ── Scrollbar hiding ─────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Portrait panel becomes a compact horizontal strip */
-  .portrait-panel {
-    width: 100% !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding: 8px 14px !important;
-    gap: 14px !important;
-    border-right: none !important;
-    border-bottom: 1px solid rgba(155,89,182,0.25) !important;
-    max-height: 110px !important;
-    overflow: hidden !important;
-    flex-shrink: 0 !important;
-  }
+/* ══════════════════════════════════════════════════════════
+   SMALL PHONES  (≤ 480px)
+══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
 
-  /* Scale down the sprite to fit the compact horizontal strip */
-  .portrait-panel .npc-portrait-bob {
-    flex-shrink: 0 !important;
-    animation: none !important;
-  }
-  /* SVG inside — override the 3.5× size back to ~1.5× on mobile */
-  .portrait-panel .npc-portrait-bob svg {
-    width: 48px !important;
-    height: 84px !important;
-  }
-
-  /* Clue boxes inside portrait on mobile */
-  .portrait-panel > div:last-child {
+  /* ── Game store: top bar ── */
+  /* Store label font */
+  .store-topbar-label {
     font-size: 9px !important;
+    letter-spacing: 0.08em !important;
   }
-
-  /* Speech panel: tighter padding on mobile */
-  .speech-panel {
-    padding: 10px 12px !important;
-    gap: 10px !important;
-  }
-
-  /* Smaller dialogue text on mobile */
-  .dialogue-box p { font-size: 12px !important; }
-  .choice-btn     { padding: 10px 12px !important; font-size: 11px !important; }
-  .guess-btn      { padding: 14px 10px !important; font-size: 11px !important; }
-}
-
-/* ── Game store select: scale down store cards on small screens ── */
-@media (max-width: 639px) {
-  .store-node {
-    transform: translate(-50%, -50%) scale(0.75) !important;
-  }
-  /* Keep float animation but with scale baked in */
-  @keyframes storeFloatMobile {
-    0%,  100% { transform: translate(-50%, -50%) scale(0.75) translateY(0px);   }
-    50%        { transform: translate(-50%, -50%) scale(0.75) translateY(-5px);  }
-  }
-  .store-node { animation: storeFloatMobile 2.8s ease-in-out infinite !important; }
-}
-
-/* ── Landing page: prevent wide text from overflowing ── */
-@media (max-width: 639px) {
-  .coin-btn {
-    padding: 10px 16px !important;
+  /* Hearts/score/mute section: tighten */
+  .store-topbar-right {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
     gap: 6px !important;
+  }
+  .store-topbar-right span { font-size: 8px !important; }
+
+  /* ── Game store: NPC lineup — reduce side padding ── */
+  .npc-lineup {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  /* ── Game store: hint banners ── */
+  .browse-hint,
+  .resume-hint {
+    white-space: normal !important;
+    text-align:  center !important;
+    width:       90vw !important;
+    flex-wrap:   wrap !important;
+  }
+  .browse-hint p,
+  .resume-hint span { font-size: 8px !important; }
+
+  /* ── Landing page: coin button ── */
+  .coin-btn {
+    padding: 10px 12px !important;
+    gap: 4px !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   .coin-btn span {
     font-size: 8px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  /* ── Game select: watermark & title ── */
+  .floor-watermark { font-size: 72px !important; }
+
+  /* ── Dialogue: speech text ── */
+  .dialogue-box p   { font-size: 12px !important; }
+  .choice-btn       { padding: 10px 12px !important; font-size: 11px !important; }
+  .guess-btn        { padding: 12px 8px  !important; font-size: 10px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE PORTRAIT  (≤ 639px)
+══════════════════════════════════════════════════════════ */
+@media (max-width: 639px) {
+
+  /* ── NPC lineup ── */
+  .npc-lineup {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* ── Hint banners allow wrapping ── */
+  .browse-hint,
+  .resume-hint {
+    white-space: normal !important;
+    max-width: 94vw !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  /* ── Dialogue: stack portrait above text ── */
+  .dialogue-content {
+    flex-direction: column !important;
+    overflow-y:     auto !important;
+  }
+
+  /* Portrait becomes a compact horizontal strip */
+  .portrait-panel {
+    width:           100% !important;
+    flex-direction:  row !important;
+    align-items:     center !important;
+    justify-content: flex-start !important;
+    padding:         8px 14px !important;
+    gap:             14px !important;
+    border-right:    none !important;
+    border-bottom:   1px solid rgba(155,89,182,0.25) !important;
+    max-height:      110px !important;
+    overflow:        hidden !important;
+    flex-shrink:     0 !important;
+  }
+
+  /* Scale down the animated sprite */
+  .portrait-panel .npc-portrait-bob {
+    flex-shrink: 0 !important;
+    animation:   none !important;
+  }
+  .portrait-panel .npc-portrait-bob svg {
+    width:  48px !important;
+    height: 84px !important;
+  }
+
+  /* Clues section inside portrait strip */
+  .portrait-panel > div:last-child { font-size: 9px !important; }
+
+  /* Speech panel tighter padding */
+  .speech-panel {
+    padding: 10px 12px !important;
+    gap:     10px !important;
+  }
+
+  /* Dialogue text & buttons */
+  .dialogue-box p { font-size: 12px !important; }
+  .choice-btn     { padding: 10px 12px !important; font-size: 11px !important; }
+  .guess-btn      { padding: 14px 10px !important; font-size: 11px !important; }
+
+  /* ── Game select: scale store cards ── */
+  .store-node {
+    transform: translate(-50%, -50%) scale(0.78) !important;
+  }
+  @keyframes storeFloatMobile {
+    0%,  100% { transform: translate(-50%, -50%) scale(0.78) translateY(0px);  }
+    50%        { transform: translate(-50%, -50%) scale(0.78) translateY(-5px); }
+  }
+  .store-node { animation: storeFloatMobile 2.8s ease-in-out infinite !important; }
+
+  /* ── Game select: title bar text ── */
+  .game-select-title {
+    font-size:      9px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  /* ── Landing: coin button ── */
+  .coin-btn {
+    padding: 10px 16px !important;
+    gap:     6px !important;
+  }
+  .coin-btn span {
+    font-size:      8px !important;
     letter-spacing: 0.15em !important;
   }
 }
 
-/* ── Wardrobe: ensure selection strip doesn't show scrollbar ── */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ══════════════════════════════════════════════════════════
+   TABLETS (640px – 1023px)
+══════════════════════════════════════════════════════════ */
+@media (min-width: 640px) and (max-width: 1023px) {
+
+  /* NPC lineup — a bit more room than desktop but less than default */
+  .npc-lineup {
+    padding-left:  32px !important;
+    padding-right: 32px !important;
+  }
+
+  /* Portrait panel: keep side-by-side but narrower */
+  .portrait-panel {
+    width: 160px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SHORT SCREENS  (landscape phones, height ≤ 500px)
+══════════════════════════════════════════════════════════ */
+@media (max-height: 500px) {
+
+  /* Dialogue box: shrink max height so it fits */
+  .dialogue-box {
+    max-height: 96vh !important;
+  }
+
+  /* Portrait panel in landscape: reduce height */
+  .portrait-panel {
+    max-height: 80px !important;
+    padding:    4px 10px !important;
+  }
+  .portrait-panel .npc-portrait-bob svg {
+    width:  36px !important;
+    height: 64px !important;
+  }
+
+  /* Guess buttons: shorter */
+  .guess-btn { padding: 10px 8px !important; }
+
+  /* Wardrobe: float animation range */
+  @keyframes floatIdleSm {
+    0%,100% { transform: translateY(0px);  }
+    50%      { transform: translateY(-6px); }
+  }
+}
