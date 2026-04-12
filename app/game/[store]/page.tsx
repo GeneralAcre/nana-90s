@@ -1,9 +1,10 @@
 "use client";
-import { use, useState, memo } from "react";
+import { use, useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useGame } from "../../context/GameContext";
 import { storeNPCs, NPC } from "../npcData";
+import { useGameAudio } from "./useGameAudio";
 
 const storeMeta: Record<string, { label: string; color: string; glow: string }> = {
   playboy:   { label: "PLAYBOY",       color: "#FF69B4", glow: "#FF1493" },
@@ -37,49 +38,6 @@ const POLE_X      = [0.31, 0.69];
 const SPOT_X      = [0.27,0.50,0.73];
 const TORCH_HALOS = [{l:118,t:"20%"},{r:118,t:"20%"},{l:98,t:"56%"},{r:98,t:"56%"}] as const;
 const BARRELS     = [{x:60,s:"left"},{x:60,s:"right"}] as const;
-
-// ── Large NPC portrait for dialogue ─────────────────────
-function NPCPortrait({ npc, speaking }: { npc: NPC; speaking: boolean }) {
-  return (
-    <div className="npc-portrait-bob" style={{ position: "relative", width: 96, margin: "0 auto" }}>
-      {/* hair */}
-      <div style={{
-        position: "absolute", top: -14, left: -8, width: 112, height: 38,
-        background: npc.hairColor, border: "4px solid #000", borderBottom: "none",
-        boxShadow: `0 -4px 12px ${npc.outfitColor}44`,
-      }} />
-      {/* head */}
-      <div style={{ width: 96, height: 96, background: "#F5C5A0", border: "4px solid #000", margin: "0 auto", position: "relative", zIndex: 1 }}>
-        {/* eyes */}
-        <div style={{ position: "absolute", top: 28, left: 16, width: 12, height: 12, background: "#000" }} />
-        <div style={{ position: "absolute", top: 28, right: 16, width: 12, height: 12, background: "#000" }} />
-        {/* eye shine */}
-        <div style={{ position: "absolute", top: 30, left: 18, width: 4, height: 4, background: "#fff" }} />
-        <div style={{ position: "absolute", top: 30, right: 18, width: 4, height: 4, background: "#fff" }} />
-        {/* blush */}
-        <div style={{ position: "absolute", top: 48, left: 8, width: 20, height: 10, background: "#FFB0A0", borderRadius: "50%", opacity: 0.65 }} />
-        <div style={{ position: "absolute", top: 48, right: 8, width: 20, height: 10, background: "#FFB0A0", borderRadius: "50%", opacity: 0.65 }} />
-        {/* mouth — open when speaking */}
-        {speaking ? (
-          <div style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", width: 22, height: 10, background: "#a04040", border: "2px solid #000", borderRadius: "0 0 10px 10px" }}>
-            <div style={{ position: "absolute", top: 1, left: 2, right: 2, height: 3, background: "#e06060", borderRadius: "2px" }} />
-          </div>
-        ) : (
-          <div style={{ position: "absolute", bottom: 18, left: "50%", transform: "translateX(-50%)", width: 22, height: 6, background: "#c0605a", borderRadius: "3px" }} />
-        )}
-      </div>
-      {/* body */}
-      <div style={{
-        width: 96, height: 80, background: npc.outfitColor, border: "4px solid #000", margin: "0 auto",
-        position: "relative", boxShadow: `0 4px 12px ${npc.outfitColor}66`,
-      }}>
-        {/* outfit detail */}
-        <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", width: 24, height: 4, background: "rgba(255,255,255,0.25)", borderRadius: 2 }} />
-        <div style={{ position: "absolute", top: 20, left: "50%", transform: "translateX(-50%)", width: 16, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2 }} />
-      </div>
-    </div>
-  );
-}
 
 // ── SVG pixel-art portrait for profile card ──────────────
 function NPCPortraitSVG({ npc }: { npc: NPC }) {
@@ -522,6 +480,84 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
   const [dialogueClosed, setDialogueClosed] = useState(false);
   const [hintClosed, setHintClosed]         = useState(false);
   const [profileIdx, setProfileIdx]         = useState(0);
+  const [gameResult, setGameResult]         = useState<"victory" | "loss" | null>(null);
+
+  const {
+    muted, toggleMute,
+    startAmbient, stopAmbient,
+    playVoiceLine, stopVoice,
+    playClick, playReveal, playVictory, playLoss,
+  } = useGameAudio();
+
+  // Typewriter state
+  const [displayedLineText, setDisplayedLineText] = useState("");
+  const [isTyping, setIsTyping]                   = useState(false);
+  const typingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function clearTyping() {
+    if (typingRef.current) { clearInterval(typingRef.current); typingRef.current = null; }
+  }
+
+  function skipTyping(fullText: string) {
+    clearTyping();
+    setDisplayedLineText(fullText);
+    setIsTyping(false);
+  }
+
+  // Start ambient on first user gesture
+  useEffect(() => {
+    const handler = () => { startAmbient(); window.removeEventListener("pointerdown", handler); };
+    window.addEventListener("pointerdown", handler);
+    return () => window.removeEventListener("pointerdown", handler);
+  }, [startAmbient]);
+
+  // Typewriter + voice when dialogue line changes
+  useEffect(() => {
+    const npc = npcs[npcIndex];
+    if (!npc || dialogueClosed) return;
+
+    let lineText = "";
+    if (phase === "talking") {
+      lineText = npc.dialogues[turnIndex]?.npcLine ?? "";
+    } else if (phase === "guess") {
+      lineText = "After spending time with me... what is your read, na ka~?";
+    }
+    if (!lineText) return;
+
+    clearTyping();
+    setDisplayedLineText("");
+    setIsTyping(true);
+    stopVoice();
+
+    const charMs = playVoiceLine(lineText, npc.id);
+    let charIdx = 0;
+
+    typingRef.current = setInterval(() => {
+      charIdx++;
+      setDisplayedLineText(lineText.slice(0, charIdx));
+      if (charIdx >= lineText.length) {
+        clearTyping();
+        setIsTyping(false);
+      }
+    }, charMs);
+
+    return () => { clearTyping(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, turnIndex, npcIndex, dialogueClosed]);
+
+  // Stop voice when dialogue is closed
+  useEffect(() => {
+    if (dialogueClosed) { stopVoice(); clearTyping(); setIsTyping(false); }
+  }, [dialogueClosed, stopVoice]);
+
+  // Fanfare when game ends
+  useEffect(() => {
+    if (phase !== "complete") return;
+    stopAmbient();
+    if (gameResult === "victory") playVictory();
+    else if (gameResult === "loss") playLoss();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, gameResult]);
 
   if (!meta) {
     return (
@@ -553,6 +589,7 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
     setRevealCorrect(correct);
     if (correct) setScore(s => s + 1); else setHearts(h => Math.max(0, h - 1));
     setResults(p => [...p, { name: currentNPC.name, correct }]);
+    playReveal(correct);
     setPhase("reveal");
   }
 
@@ -562,8 +599,10 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
     // called in handleGuess but not yet applied), so derive the effective values.
     const effectiveHearts = revealCorrect ? hearts : hearts - 1;
     setDoneNPCs(prev => new Set([...prev, npcIndex]));
-    if (newDoneSize >= npcs.length || effectiveHearts <= 0) setPhase("complete");
-    else { setPhase("browse"); setLatestClue(null); setClues([]); setHintClosed(false); }
+    if (newDoneSize >= npcs.length || effectiveHearts <= 0) {
+      setGameResult(effectiveHearts <= 0 ? "loss" : "victory");
+      setPhase("complete");
+    } else { setPhase("browse"); setLatestClue(null); setClues([]); setHintClosed(false); }
   }
 
   return (
@@ -585,6 +624,12 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
           style={{ background: "#0d0020", border: `2px solid ${meta.color}`, borderLeft: "none" }}>
           <span style={{ color: "#FF4444", fontSize: "10px" }}>{"♥".repeat(hearts)}{"♡".repeat(3 - hearts)}</span>
           <span style={{ color: "#FFE44D", fontSize: "8px" }}>{score}/{npcs.length}</span>
+          <button
+            onClick={toggleMute}
+            title={muted ? "Unmute" : "Mute"}
+            style={{ background: "none", border: "none", cursor: "pointer", color: muted ? "#555" : "#E0C8FF", fontSize: "14px", lineHeight: 1, padding: "0 2px" }}>
+            {muted ? "🔇" : "🔊"}
+          </button>
         </div>
       </div>
 
@@ -827,27 +872,35 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
                   {/* ── TALKING phase ── */}
                   {phase === "talking" && currentTurn && (
                     <>
-                      {/* Speech bubble */}
-                      <div style={{
-                        flex: 1,
-                        padding: "18px 20px",
-                        background: "rgba(255,255,255,0.04)",
-                        border: `2px solid ${currentNPC.outfitColor}44`,
-                        borderLeft: `4px solid ${currentNPC.outfitColor}`,
-                        position: "relative",
-                      }}>
+                      {/* Speech bubble — click to skip typewriter */}
+                      <div
+                        onClick={() => isTyping ? skipTyping(currentTurn.npcLine) : undefined}
+                        style={{
+                          flex: 1,
+                          padding: "18px 20px",
+                          background: "rgba(255,255,255,0.04)",
+                          border: `2px solid ${currentNPC.outfitColor}44`,
+                          borderLeft: `4px solid ${currentNPC.outfitColor}`,
+                          position: "relative",
+                          cursor: isTyping ? "pointer" : "default",
+                        }}>
                         {/* quotation mark decoration */}
                         <div style={{ position: "absolute", top: 8, left: 14, fontSize: "28px", color: `${currentNPC.outfitColor}33`, lineHeight: 1, pointerEvents: "none", fontFamily: "serif" }}>"</div>
                         <p style={{ color: "#EEE0FF", fontSize: "14px", lineHeight: 2.0, fontFamily: "sans-serif", paddingLeft: 20, paddingTop: 8, paddingRight: 8 }}>
-                          {currentTurn.npcLine}
+                          {displayedLineText}
+                          {isTyping && <span className="type-cursor">|</span>}
                         </p>
+                        {isTyping && (
+                          <span style={{ position: "absolute", bottom: 8, right: 12, fontSize: "7px", color: `${currentNPC.outfitColor}77`, letterSpacing: "0.1em" }}>CLICK TO SKIP</span>
+                        )}
                       </div>
 
-                      {/* Player choices */}
+                      {/* Player choices — only show when typing is done */}
+                      {!isTyping && (
                       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         <p style={{ color: "#9B59B6", fontSize: "8px", letterSpacing: "0.15em" }}>YOUR RESPONSE:</p>
                         {currentTurn.choices.map((c, i) => (
-                          <button key={i} onClick={() => handleChoice(c.clue)}
+                          <button key={i} onClick={() => { playClick(); handleChoice(c.clue); }}
                             className="choice-btn"
                             style={{
                               textAlign: "left", padding: "14px 18px",
@@ -863,33 +916,38 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
                           </button>
                         ))}
                       </div>
+                      )}
                     </>
                   )}
 
                   {/* ── GUESS phase ── */}
                   {phase === "guess" && (
                     <>
-                      <div style={{ padding: "18px 20px", background: "rgba(255,200,0,0.05)", border: "2px solid #FFE44D44", borderLeft: "4px solid #FFE44D" }}>
+                      <div
+                        onClick={() => isTyping ? skipTyping(`After spending time with me... what is your read, na ka~?`) : undefined}
+                        style={{ padding: "18px 20px", background: "rgba(255,200,0,0.05)", border: "2px solid #FFE44D44", borderLeft: "4px solid #FFE44D", cursor: isTyping ? "pointer" : "default", position: "relative" }}>
                         <p style={{ color: "#FFE44D", fontSize: "11px", letterSpacing: "0.12em", marginBottom: 10, textShadow: "0 0 6px #FFB800" }}>
                           🤔 TIME TO DECIDE
                         </p>
                         <p style={{ color: "#EEE0FF", fontSize: "15px", lineHeight: 1.8, fontFamily: "sans-serif" }}>
-                          After spending time with <span style={{ color: "#FFE44D" }}>{currentNPC.name}</span>, what&apos;s your read?
+                          {displayedLineText}
+                          {isTyping && <span className="type-cursor">|</span>}
                         </p>
+                        {isTyping && <span style={{ position: "absolute", bottom: 8, right: 12, fontSize: "7px", color: "#FFE44D55" }}>CLICK TO SKIP</span>}
                       </div>
 
-                      <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
-                        <button onClick={() => handleGuess(false)}
+                      {!isTyping && <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
+                        <button onClick={() => { playClick(); handleGuess(false); }}
                           className="guess-btn"
                           style={{ flex: 1, padding: "20px 12px", background: "#112211", border: "3px solid #4CAF50", color: "#6FE87A", fontSize: "13px", fontFamily: "'Press Start 2P',monospace", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 0 16px #4CAF5033", lineHeight: 1.6 }}>
                           👧<br />REAL GIRL
                         </button>
-                        <button onClick={() => handleGuess(true)}
+                        <button onClick={() => { playClick(); handleGuess(true); }}
                           className="guess-btn"
                           style={{ flex: 1, padding: "20px 12px", background: "#221128", border: "3px solid #FF69B4", color: "#FF9ECC", fontSize: "13px", fontFamily: "'Press Start 2P',monospace", letterSpacing: "0.08em", cursor: "pointer", boxShadow: "0 0 16px #FF69B433", lineHeight: 1.6 }}>
                           💅<br />LADYBOY
                         </button>
-                      </div>
+                      </div>}
                     </>
                   )}
                 </div>
@@ -916,26 +974,158 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
           </div>
         )}
 
-        {/* ── Complete overlay ── */}
-        {phase === "complete" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-30">
-            <div style={{ width: "min(400px,90vw)", padding: "28px", background: "#0a0018", border: `4px solid ${meta.color}`, boxShadow: `0 0 30px ${meta.glow}66`, display: "flex", flexDirection: "column", gap: 14 }}>
-              <p className="text-center" style={{ color: meta.color, fontSize: "15px", textShadow: `0 0 12px ${meta.glow}`, letterSpacing: "0.2em" }}>{meta.label} COMPLETE</p>
-              <p className="text-center" style={{ color: "#FFE44D", fontSize: "26px", textShadow: "0 0 10px #FFB800" }}>{score}/{npcs.length}</p>
-              <div>{results.map((r, i) => <p key={i} style={{ fontSize: "9px", color: r.correct ? "#6FE87A" : "#FF6666", marginBottom: 4 }}>{r.correct ? "✓" : "✗"} {r.name.toUpperCase()}</p>)}</div>
-              <p style={{ color: "#C8A8E0", fontSize: "8px", textAlign: "center", letterSpacing: "0.1em" }}>
-                {score === npcs.length ? "PERFECT SCORE — SHARP INSTINCTS!" : score >= 2 ? "GOOD READ — ALMOST GOT IT!" : "NEEDS WORK — LISTEN MORE CAREFULLY"}
-              </p>
-              <div style={{ display: "flex", gap: 10 }}>
-                <Link href="/game" style={{ flex: 1, padding: "10px", textAlign: "center", background: "#0d0020", border: `2px solid ${meta.color}`, color: meta.color, fontSize: "8px", letterSpacing: "0.1em", textDecoration: "none", fontFamily: "'Press Start 2P',monospace" }}>◀ MAP</Link>
-                <button onClick={() => { setPhase("browse"); setScore(0); setHearts(3); setResults([]); setDoneNPCs(new Set()); setNpcIndex(0); setTurnIndex(0); setClues([]); setLatestClue(null); setHintClosed(false); setDialogueClosed(false); }}
-                  style={{ flex: 1, padding: "10px", background: "#1a0040", border: "2px solid #FFE44D", color: "#FFE44D", fontSize: "8px", letterSpacing: "0.1em", cursor: "pointer", fontFamily: "'Press Start 2P',monospace" }}>
-                  ↺ RETRY
-                </button>
+        {/* ── Complete overlay — Victory / Loss ── */}
+        {phase === "complete" && (() => {
+          const isVictory = gameResult === "victory";
+          const isPerfect = score === npcs.length;
+          const accentColor  = isVictory ? "#FFE44D" : "#FF4444";
+          const accentGlow   = isVictory ? "#FFB800" : "#CC0000";
+          const bgGradient   = isVictory
+            ? "linear-gradient(180deg, #0a0800 0%, #140c00 60%, #0a0018 100%)"
+            : "linear-gradient(180deg, #0a0000 0%, #150000 60%, #0a0018 100%)";
+          const borderColor  = isVictory ? "#FFE44D" : "#FF4444";
+          const titleText    = isPerfect ? "PERFECT!" : isVictory ? "VICTORY!" : "GAME OVER";
+          const subtitleText = isPerfect
+            ? "FLAWLESS INSTINCTS — NOTHING GETS PAST YOU"
+            : isVictory
+            ? `${score} OUT OF ${npcs.length} — SHARP EYES`
+            : "YOU RAN OUT OF HEARTS";
+
+          return (
+            <div className="absolute inset-0 flex items-center justify-center z-30 result-screen-enter"
+              style={{ background: "rgba(0,0,0,0.88)", backdropFilter: "blur(4px)" }}>
+
+              {/* Particle layer */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {isVictory && [...Array(18)].map((_, i) => (
+                  <div key={i} className="confetti-particle"
+                    style={{
+                      position: "absolute",
+                      left: `${(i * 5.5 + 3) % 100}%`,
+                      top: "-10%",
+                      width: 8, height: 8,
+                      background: ["#FFE44D","#FF69B4","#6FE87A","#00BFFF","#FF4500","#C060FF"][i % 6],
+                      animationDelay: `${(i * 0.18) % 2.4}s`,
+                    }} />
+                ))}
+              </div>
+
+              <div style={{
+                width: "min(460px, 94vw)",
+                background: bgGradient,
+                border: `4px solid ${borderColor}`,
+                boxShadow: `0 0 60px ${accentGlow}55, 0 0 120px ${accentGlow}22, inset 0 0 80px rgba(0,0,0,0.7)`,
+                display: "flex", flexDirection: "column", alignItems: "center",
+                padding: "36px 28px 28px", gap: 0,
+                position: "relative",
+                fontFamily: "'Press Start 2P', monospace",
+              }}>
+                {/* Corner brackets */}
+                {(["tl","tr","bl","br"] as const).map(c => (
+                  <div key={c} style={{
+                    position: "absolute",
+                    ...(c[0]==="t" ? { top: 10 } : { bottom: 10 }),
+                    ...(c[1]==="l" ? { left: 10 } : { right: 10 }),
+                    width: 20, height: 20,
+                    borderTop:    c[0]==="t" ? `2px solid ${borderColor}88` : "none",
+                    borderBottom: c[0]==="b" ? `2px solid ${borderColor}88` : "none",
+                    borderLeft:   c[1]==="l" ? `2px solid ${borderColor}88` : "none",
+                    borderRight:  c[1]==="r" ? `2px solid ${borderColor}88` : "none",
+                  }} />
+                ))}
+
+                {/* Big icon */}
+                <div className="result-icon-pop" style={{ fontSize: 64, lineHeight: 1, marginBottom: 16 }}>
+                  {isPerfect ? "🏆" : isVictory ? "🎉" : "💔"}
+                </div>
+
+                {/* Title */}
+                <div className="result-title-flash" style={{
+                  fontSize: "clamp(22px, 6vw, 32px)",
+                  color: accentColor,
+                  textShadow: `0 0 14px ${accentGlow}, 0 0 32px ${accentGlow}88`,
+                  letterSpacing: "0.25em",
+                  marginBottom: 10,
+                  textAlign: "center",
+                }}>
+                  {titleText}
+                </div>
+
+                {/* Subtitle */}
+                <div style={{ color: "#C8A8E0", fontSize: "9px", letterSpacing: "0.12em", textAlign: "center", marginBottom: 24 }}>
+                  {subtitleText}
+                </div>
+
+                {/* Score display */}
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
+                  padding: "14px 28px",
+                  background: `${accentColor}12`,
+                  border: `2px solid ${accentColor}44`,
+                }}>
+                  <span style={{ color: "#888", fontSize: "9px", letterSpacing: "0.1em" }}>SCORE</span>
+                  <span style={{ color: accentColor, fontSize: "32px", textShadow: `0 0 12px ${accentGlow}`, letterSpacing: "0.1em" }}>
+                    {score}<span style={{ color: "#555", fontSize: "18px" }}>/{npcs.length}</span>
+                  </span>
+                  <span style={{ color: "#FF4444", fontSize: "13px" }}>{"♥".repeat(Math.max(0, hearts))}{"♡".repeat(Math.max(0, 3 - hearts))}</span>
+                </div>
+
+                {/* Results breakdown */}
+                <div style={{
+                  width: "100%", marginBottom: 22,
+                  display: "flex", flexDirection: "column", gap: 6,
+                }}>
+                  {results.map((r, i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "8px 12px",
+                      background: r.correct ? "rgba(79,175,74,0.08)" : "rgba(255,68,68,0.08)",
+                      border: `1px solid ${r.correct ? "#4CAF5033" : "#FF444433"}`,
+                    }}>
+                      <span style={{ color: r.correct ? "#6FE87A" : "#FF6666", fontSize: "12px", flexShrink: 0 }}>
+                        {r.correct ? "✓" : "✗"}
+                      </span>
+                      <span style={{ color: r.correct ? "#6FE87A" : "#FF9090", fontSize: "8px", flex: 1, letterSpacing: "0.1em" }}>
+                        {r.name.toUpperCase()}
+                      </span>
+                      <span style={{ color: r.correct ? "#4CAF5066" : "#FF444466", fontSize: "7px" }}>
+                        {r.correct ? "CORRECT" : "WRONG"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: 12, width: "100%" }}>
+                  <Link href="/game" style={{
+                    flex: 1, padding: "12px", textAlign: "center",
+                    background: "#0d0020", border: `2px solid ${meta.color}`,
+                    color: meta.color, fontSize: "8px", letterSpacing: "0.1em",
+                    textDecoration: "none",
+                  }}>
+                    ◀ MAP
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setPhase("browse"); setScore(0); setHearts(3); setResults([]);
+                      setDoneNPCs(new Set()); setNpcIndex(0); setTurnIndex(0);
+                      setClues([]); setLatestClue(null); setHintClosed(false);
+                      setDialogueClosed(false); setGameResult(null);
+                    }}
+                    style={{
+                      flex: 1, padding: "12px",
+                      background: isVictory ? "#1a1000" : "#1a0000",
+                      border: `2px solid ${accentColor}`,
+                      color: accentColor, fontSize: "8px", letterSpacing: "0.1em",
+                      cursor: "pointer",
+                    }}>
+                    ↺ RETRY
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Bottom bar */}
@@ -1131,6 +1321,41 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
 
         .choice-btn:hover { background:#260050 !important; border-color:${`#c470f8`} !important; color:#fff !important; }
         .guess-btn:hover  { filter:brightness(1.25); transform:scale(1.02); }
+
+        /* ── Typewriter cursor ── */
+        @keyframes cursorBlink {
+          0%,100% { opacity: 1; }
+          50%     { opacity: 0; }
+        }
+        .type-cursor { animation: cursorBlink 0.55s step-start infinite; font-weight: bold; margin-left: 1px; }
+
+        /* ── Victory / Loss screen ── */
+        @keyframes resultScreenEnter {
+          from { opacity:0; transform:scale(0.92); }
+          to   { opacity:1; transform:scale(1); }
+        }
+        .result-screen-enter { animation: resultScreenEnter 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+        @keyframes resultIconPop {
+          0%  { transform:scale(0) rotate(-20deg); opacity:0; }
+          60% { transform:scale(1.25) rotate(6deg); opacity:1; }
+          100%{ transform:scale(1) rotate(0deg); }
+        }
+        .result-icon-pop { animation: resultIconPop 0.55s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+
+        @keyframes resultTitleFlash {
+          0%  { opacity:0; letter-spacing:0.6em; }
+          60% { opacity:1; letter-spacing:0.28em; }
+          100%{ letter-spacing:0.25em; }
+        }
+        .result-title-flash { animation: resultTitleFlash 0.5s ease-out 0.4s both; }
+
+        @keyframes confettiFall {
+          0%   { transform:translateY(0) rotate(0deg); opacity:1; }
+          80%  { opacity:1; }
+          100% { transform:translateY(110vh) rotate(540deg); opacity:0; }
+        }
+        .confetti-particle { animation: confettiFall 2.4s ease-in infinite; }
 
         /* ── Responsive dialogue ── */
         @media (max-width: 600px) {

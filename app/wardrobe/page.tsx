@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 
 const T = {
@@ -154,6 +154,36 @@ export default function WardrobePage() {
   const { setSuitColor } = useGame();
   const [activeIndex, setActiveIndex] = useState(0);
   const [animKey,     setAnimKey]     = useState(0);
+  const [playing,     setPlaying]     = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio("/Nana_After_Midnight.mp3");
+    audio.loop = true;
+    audio.volume = 0.55;
+    audioRef.current = audio;
+
+    // Try autoplay immediately; if browser blocks it, start on first tap
+    audio.play().then(() => setPlaying(true)).catch(() => {
+      const start = () => {
+        audio.play().then(() => setPlaying(true)).catch(() => {});
+        window.removeEventListener("pointerdown", start);
+      };
+      window.addEventListener("pointerdown", start);
+    });
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, []);
+
+  function toggleMusic() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) { audio.play(); setPlaying(true); }
+    else { audio.pause(); setPlaying(false); }
+  }
 
   const handleSelect = useCallback(
     (i: number) => {
@@ -214,7 +244,10 @@ export default function WardrobePage() {
           SELECT CHARACTER
         </h1>
 
-        <div style={{ width: 'clamp(32px, 3.5vw, 40px)' }} />
+        <button onClick={toggleMusic} style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center', padding: 0, width: 'clamp(32px, 3.5vw, 40px)' }}>
+          <div style={{ color: '#FF69B4', fontSize: 'clamp(6px, 0.7vw, 8px)', letterSpacing: '0.2em' }}>MUSIC</div>
+          <div style={{ color: '#fff', fontSize: 14, marginTop: 2 }}>{playing ? '🔊' : '🔇'}</div>
+        </button>
       </div>
 
       {/* ── MAIN AREA ── */}

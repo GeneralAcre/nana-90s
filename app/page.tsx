@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 function Blink({ children, ms = 550 }: { children: React.ReactNode; ms?: number }) {
@@ -92,6 +92,37 @@ const DANCERS = [
 ];
 
 export default function LandingPage() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = new Audio("/Nana_After_Midnight.mp3");
+    audio.loop = true;
+    audio.volume = 0.55;
+    audioRef.current = audio;
+
+    // Try autoplay immediately; if browser blocks it, start on first tap
+    audio.play().then(() => setPlaying(true)).catch(() => {
+      const start = () => {
+        audio.play().then(() => setPlaying(true)).catch(() => {});
+        window.removeEventListener("pointerdown", start);
+      };
+      window.addEventListener("pointerdown", start);
+    });
+
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, []);
+
+  function toggleMusic() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) { audio.play(); setPlaying(true); }
+    else { audio.pause(); setPlaying(false); }
+  }
+
   return (
     <div
       style={{
@@ -125,6 +156,10 @@ export default function LandingPage() {
             <Blink ms={800}>02</Blink>
           </div>
         </div>
+        <button onClick={toggleMusic} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "center", padding: 0 }}>
+          <div style={{ color: "#FF69B4", fontSize: "8px", letterSpacing: "0.3em" }}>MUSIC</div>
+          <div style={{ color: "#fff", fontSize: "14px", marginTop: 2 }}>{playing ? "🔊" : "🔇"}</div>
+        </button>
       </div>
 
       {/* ── TITLE ── */}
