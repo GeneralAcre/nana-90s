@@ -169,13 +169,13 @@ function NPCPortraitSVG({ npc }: { npc: NPC }) {
 }
 
 // ── Small SVG sprite body for bar scene ──────────────────
-function NPCSpriteSmall({ npc, walking }: { npc: NPC; walking: boolean }) {
+function NPCSpriteSmall({ npc, walking, size = 1 }: { npc: NPC; walking: boolean; size?: number }) {
   const skin = "#F5C5A0";
   const hair = npc.hairColor;
   const top  = npc.outfitColor;
   return (
     <svg viewBox="0 0 32 56" xmlns="http://www.w3.org/2000/svg"
-      style={{ width: 32, height: 56, imageRendering: "pixelated", overflow: "visible" }}>
+      style={{ width: 32 * size, height: 56 * size, imageRendering: "pixelated", overflow: "visible" }}>
       {/* Hair back */}
       <rect x="4"  y="1"  width="24" height="16" rx="2" fill={hair}/>
       <rect x="2"  y="7"  width="4"  height="14" rx="1" fill={hair}/>
@@ -775,9 +775,15 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
                   <div style={{ position: "absolute", bottom: 8, left: 8, width: 20, height: 20, borderBottom: `2px solid ${currentNPC.outfitColor}77`, borderLeft: `2px solid ${currentNPC.outfitColor}77` }} />
                   <div style={{ position: "absolute", bottom: 8, right: 8, width: 20, height: 20, borderBottom: `2px solid ${currentNPC.outfitColor}77`, borderRight: `2px solid ${currentNPC.outfitColor}77` }} />
                   {/* portrait glow background */}
-                  <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translate(-50%,-50%)", width: 120, height: 120, background: `radial-gradient(circle, ${currentNPC.outfitColor}22 0%, transparent 70%)`, pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%,-50%)", width: 160, height: 160, background: `radial-gradient(circle, ${currentNPC.outfitColor}22 0%, transparent 70%)`, pointerEvents: "none" }} />
 
-                  <NPCPortrait npc={currentNPC} speaking={phase === "talking"} />
+                  {/* Sprite — same look as dance floor, scaled up 3.5× */}
+                  <div className="npc-portrait-bob" style={{
+                    imageRendering: "pixelated",
+                    filter: `drop-shadow(0 0 16px ${currentNPC.outfitColor}88)`,
+                  }}>
+                    <NPCSpriteSmall npc={currentNPC} walking={phase === "talking"} size={3.5} />
+                  </div>
 
                   {/* Name plate */}
                   <div style={{ textAlign: "center" }}>

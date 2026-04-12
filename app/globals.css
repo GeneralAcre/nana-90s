@@ -73,14 +73,15 @@ body {
     flex-shrink: 0 !important;
   }
 
-  /* Scale down the pixel portrait to fit the strip */
+  /* Scale down the sprite to fit the compact horizontal strip */
   .portrait-panel .npc-portrait-bob {
-    transform: scale(0.48) !important;
-    transform-origin: top left !important;
-    width: 46px !important;
-    height: 46px !important;
     flex-shrink: 0 !important;
     animation: none !important;
+  }
+  /* SVG inside — override the 3.5× size back to ~1.5× on mobile */
+  .portrait-panel .npc-portrait-bob svg {
+    width: 48px !important;
+    height: 84px !important;
   }
 
   /* Clue boxes inside portrait on mobile */
