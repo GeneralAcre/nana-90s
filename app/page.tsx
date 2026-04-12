@@ -172,10 +172,10 @@ export default function LandingPage() {
             gap: "20px",
             flexWrap: "wrap"
         }}>
-          <span style={{ color: "#FFE44D", textShadow: "4px 4px 0 #b87800" }}>NANA</span>
-          <span style={{ color: "#FF69B4", textShadow: "4px 4px 0 #8B0057" }}>PLAZA</span>
+          <span style={{ color: "#FFE44D", textShadow: "4px 4px 0 #b87800" }}>GIRL</span>
+          <span style={{ color: "#FF69B4", textShadow: "4px 4px 0 #8B0057" }}>OR LADYBOY</span>
         </div>
-        
+
         <div style={{
             display: "inline-block",
             margin: "15px 0",
@@ -188,7 +188,7 @@ export default function LandingPage() {
             maxWidth: "90vw",
             textAlign: "center",
         }}>
-            WHO IS THE LADYBOY
+            CAN YOU TELL THE DIFFERENCE?
         </div>
       </div>
 
@@ -230,13 +230,9 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── STAGE INFO + BUTTON ── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-        <div style={{ color: "#9B59B655", fontSize: "7px", letterSpacing: "0.4em" }}>◆ SUKHUMVIT SOI 4, BANGKOK ◆</div>
-        <div style={{ color: "#FFE44D55", fontSize: "7px", border: "1px solid #FFE44D22", padding: "4px 14px" }}>STAGE 01 — ENTER THE BAR</div>
-
-        {/* ── BUTTON — centred in the flex gap so it sits well above the footer ── */}
-        <Link href="/wardrobe" style={{ textDecoration: "none", marginTop: 8 }}>
+      {/* ── BUTTON ── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <Link href="/wardrobe" style={{ textDecoration: "none" }}>
           <div className="coin-btn" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", background: "rgba(0,0,0,0.85)", border: "3px solid #FFE44D", boxShadow: "4px 4px 0 #7a5800", cursor: "pointer" }}>
             <span style={{ color: "#FFE44D", fontSize: "10px", letterSpacing: "0.3em" }}>฿ INSERT COIN</span>
             <span style={{ color: "#FF69B4", fontSize: "10px", letterSpacing: "0.3em" }}><Blink>&amp; PRESS START</Blink></span>
@@ -245,10 +241,15 @@ export default function LandingPage() {
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 20px", borderTop: "1px solid #ffffff11" }}>
-        <span style={{ color: "#ffffff33", fontSize: "7px" }}>© 2026 SOI4 GAMES</span>
-        <span style={{ color: "#FF69B4", fontSize: "7px" }}><Blink ms={1100}>▶ PLAYER 1</Blink></span>
-        <span style={{ color: "#ffffff33", fontSize: "7px" }}>BKK_SOI_4</span>
+      <div style={{ borderTop: "1px solid #ffffff22" }}>
+        <div style={{ textAlign: "center", padding: "8px 20px 4px", fontSize: "8px", color: "#ffffff99", letterSpacing: "0.25em" }}>
+          INSPIRED BY NANA PLAZA · SUKHUMVIT SOI 4 · BANGKOK
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 20px 12px" }}>
+          <span style={{ color: "#ffffff55", fontSize: "8px" }}>© 2026 SOI4 GAMES</span>
+          <span style={{ color: "#FF69B4", fontSize: "8px" }}><Blink ms={1100}>▶ PLAYER 1</Blink></span>
+          <span style={{ color: "#ffffff55", fontSize: "8px" }}>BKK_SOI_4</span>
+        </div>
       </div>
 
       <style jsx global>{`

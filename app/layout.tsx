@@ -2,8 +2,8 @@ import "./globals.css";
 import ClientWrapper from "./component/ClientWrapper";
 
 export const metadata = {
-  title: "Nana Plaza Sim",
-  description: "A retro-styled 3D experience",
+  title: "Girl or Ladyboy",
+  description: "Can you tell the difference? A retro arcade game set in Bangkok.",
 };
 
 export const viewport = {
