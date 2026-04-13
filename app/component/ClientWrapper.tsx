@@ -10,7 +10,7 @@ const BackgroundScene = dynamic(() => import("./BackgroundScene"), {
 });
 
 function getTrack(pathname: string): "landing" | "game" | null {
-  if (pathname === "/" || pathname === "/wardrobe") return "landing";
+  if (pathname === "/" || pathname === "/wardrobe" || pathname === "/online") return "landing";
   if (pathname === "/game" || pathname.startsWith("/game/")) return "game";
   return null;
 }

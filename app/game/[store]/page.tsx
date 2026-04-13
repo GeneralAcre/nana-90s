@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useGame } from "../../context/GameContext";
 import { storeNPCs, NPC } from "../npcData";
 import { useGameAudio } from "./useGameAudio";
+import { supabase } from "../../lib/supabase";
 
 const storeMeta: Record<string, { label: string; color: string; glow: string }> = {
   playboy:   { label: "PLAYBOY",       color: "#FF69B4", glow: "#FF1493" },
@@ -460,12 +461,18 @@ function ProfileStatBar({ label, value, color }: { label: string; value: number;
 type Phase = "browse" | "profile" | "talking" | "guess" | "reveal" | "complete";
 
 export default function StorePage({ params }: { params: Promise<{ store: string }> }) {
-  const { store }   = use(params);
-  const { suitColor } = useGame();
+  const { store } = use(params);
+  const { suitColor, player2Color, roomCode, onlinePlayer } = useGame();
 
-  const meta    = storeMeta[store];
-  const npcs    = storeNPCs[store] ?? [];
-  const charImg = playerChars[suitColor] ?? "/characters/George.png";
+  const meta      = storeMeta[store];
+  const npcs      = storeNPCs[store] ?? [];
+  const charImg   = playerChars[suitColor]    ?? "/characters/George.png";
+  const p2CharImg = playerChars[player2Color] ?? "/characters/George.png";
+  const isOnline  = !!roomCode && !!onlinePlayer;
+
+  // For comparison: P1's image vs P2's image, from each player's perspective
+  const myImg  = charImg;
+  const oppImg = p2CharImg;
 
   const [phase, setPhase]                   = useState<Phase>("browse");
   const [npcIndex, setNpcIndex]             = useState(0);
@@ -481,6 +488,14 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
   const [hintClosed, setHintClosed]         = useState(false);
   const [profileIdx, setProfileIdx]         = useState(0);
   const [gameResult, setGameResult]         = useState<"victory" | "loss" | null>(null);
+  const [showHandoff, setShowHandoff]       = useState(false);
+  const [waitingOpponent, setWaitingOpponent] = useState(false);
+  const [onlineResult, setOnlineResult]     = useState<{
+    p1Score: number; p1Hearts: number;
+    p2Score: number; p2Hearts: number;
+    total: number;
+  } | null>(null);
+  const onlinePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     muted, toggleMute,
@@ -595,15 +610,53 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
 
   function continueAfterReveal() {
     const newDoneSize = doneNPCs.size + 1;
-    // revealCorrect and hearts are both stale closures here (their setters were
-    // called in handleGuess but not yet applied), so derive the effective values.
     const effectiveHearts = revealCorrect ? hearts : hearts - 1;
     setDoneNPCs(prev => new Set([...prev, npcIndex]));
     if (newDoneSize >= npcs.length || effectiveHearts <= 0) {
-      setGameResult(effectiveHearts <= 0 ? "loss" : "victory");
+      const result: "victory" | "loss" = effectiveHearts <= 0 ? "loss" : "victory";
+      setGameResult(result);
       setPhase("complete");
+      // Online mode: submit score then wait for opponent
+      if (isOnline) {
+        handleOnlineComplete(score, effectiveHearts, npcs.length);
+      }
     } else { setPhase("browse"); setLatestClue(null); setClues([]); setHintClosed(false); }
   }
+
+  async function handleOnlineComplete(finalScore: number, finalHearts: number, total: number) {
+    if (!roomCode || !onlinePlayer) return;
+    setWaitingOpponent(true);
+
+    const myFields = onlinePlayer === 1
+      ? { p1_score: finalScore, p1_hearts: finalHearts, p1_total: total, p1_done: true }
+      : { p2_score: finalScore, p2_hearts: finalHearts, p2_total: total, p2_done: true };
+
+    await supabase.from("rooms").update(myFields).eq("code", roomCode);
+
+    // Poll every 2s until opponent finishes
+    const poll = setInterval(async () => {
+      const { data } = await supabase.from("rooms").select("*").eq("code", roomCode).single();
+      if (data?.p1_done && data?.p2_done) {
+        clearInterval(poll);
+        onlinePollRef.current = null;
+        setOnlineResult({
+          p1Score: data.p1_score, p1Hearts: data.p1_hearts,
+          p2Score: data.p2_score, p2Hearts: data.p2_hearts,
+          total: data.p1_total || data.p2_total,
+        });
+        setWaitingOpponent(false);
+      }
+    }, 2000);
+
+    onlinePollRef.current = poll;
+  }
+
+  // Cleanup poll on unmount
+  useEffect(() => {
+    return () => {
+      if (onlinePollRef.current) clearInterval(onlinePollRef.current);
+    };
+  }, []);
 
   return (
     <div className="relative w-screen h-dvh overflow-hidden select-none flex flex-col"
@@ -622,6 +675,11 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
         </div>
         <div className="flex items-center gap-2 px-3"
           style={{ background: "#0d0020", border: `2px solid ${meta.color}`, borderLeft: "none" }}>
+          {isOnline && (
+            <span style={{ color: onlinePlayer === 2 ? "#FF69B4" : "#FFE44D", fontSize: "7px", letterSpacing: "0.1em", marginRight: 2 }}>
+              P{onlinePlayer}
+            </span>
+          )}
           <span style={{ color: "#FF4444", fontSize: "10px" }}>{"♥".repeat(hearts)}{"♡".repeat(3 - hearts)}</span>
           <span style={{ color: "#FFE44D", fontSize: "8px" }}>{score}/{npcs.length}</span>
           <button
@@ -1127,6 +1185,126 @@ export default function StorePage({ params }: { params: Promise<{ store: string 
           );
         })()}
       </div>
+
+      {/* ── HANDOFF SCREEN (P1 done → pass to P2) ── */}
+      {showHandoff && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center"
+          style={{ zIndex: 9999, background: "rgba(0,0,0,0.96)", fontFamily: "'Press Start 2P',monospace" }}>
+          <div style={{ fontSize: 56, marginBottom: 16 }}>🤝</div>
+          <div style={{ color: "#FFE44D", fontSize: "clamp(16px,4vw,24px)", letterSpacing: "0.2em", textShadow: "0 0 16px #FFB800", marginBottom: 10 }}>
+            PLAYER 1 DONE!
+          </div>
+          <div style={{ color: "#FFE44D", fontSize: "clamp(14px,3vw,20px)", marginBottom: 6 }}>
+            {score} / {npcs.length}
+            <span style={{ color: "#FF4444", marginLeft: 12 }}>{"♥".repeat(Math.max(0, hearts))}</span>
+          </div>
+          <div style={{ color: "#888", fontSize: "9px", letterSpacing: "0.2em", margin: "20px 0 32px", textAlign: "center", lineHeight: 2 }}>
+            PASS THE DEVICE TO<br />
+            <span style={{ color: "#FF69B4" }}>PLAYER 2</span>
+          </div>
+          <button
+            onClick={() => {
+              // Reset all game state for P2
+              setShowHandoff(false);
+              setPhase("browse");
+              setScore(0); setHearts(3); setResults([]);
+              setDoneNPCs(new Set()); setNpcIndex(0); setTurnIndex(0);
+              setClues([]); setLatestClue(null);
+              setHintClosed(false); setDialogueClosed(false); setGameResult(null);
+            }}
+            style={{
+              padding: "16px 36px", fontSize: "11px", fontFamily: "'Press Start 2P',monospace",
+              background: "linear-gradient(180deg, #4A043A, #100008)",
+              border: "3px solid #FF69B4", color: "#FF69B4",
+              boxShadow: "0 0 20px #FF69B455", cursor: "pointer", letterSpacing: "0.15em",
+            }}>
+            ▶ PLAYER 2 — TAP TO START
+          </button>
+        </div>
+      )}
+
+      {/* ── ONLINE: WAITING FOR OPPONENT ── */}
+      {waitingOpponent && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 text-center"
+          style={{ zIndex: 9999, background: "rgba(0,0,0,0.95)", fontFamily: "'Press Start 2P',monospace" }}>
+          <div style={{ fontSize: 48 }}>⏳</div>
+          <div style={{ color: "#FFE44D", fontSize: "clamp(14px,3vw,20px)", letterSpacing: "0.15em" }}>YOUR SCORE</div>
+          <div style={{ color: "#fff", fontSize: "clamp(28px,6vw,48px)", letterSpacing: "0.1em" }}>
+            {score}<span style={{ fontSize: "clamp(14px,3vw,22px)", color: "#555" }}>/{npcs.length}</span>
+          </div>
+          <div style={{ color: "#FF4444", fontSize: "clamp(14px,3vw,20px)" }}>
+            {"♥".repeat(Math.max(0, hearts))}{"♡".repeat(Math.max(0, 3 - hearts))}
+          </div>
+          <div style={{ color: "#888", fontSize: "clamp(8px,1.2vw,11px)", letterSpacing: "0.2em", marginTop: 12 }}>
+            WAITING FOR OPPONENT...
+          </div>
+          <div style={{ width: 8, height: 8, background: "#FF69B4", borderRadius: "50%", animation: "pixelBob 0.8s ease-in-out infinite" }} />
+        </div>
+      )}
+
+      {/* ── ONLINE: COMPARISON SCREEN ── */}
+      {isOnline && onlineResult && !waitingOpponent && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center gap-4 px-4"
+          style={{ zIndex: 9999, background: "rgba(0,0,0,0.96)", fontFamily: "'Press Start 2P',monospace" }}>
+          {(() => {
+            const myScore  = onlinePlayer === 1 ? onlineResult.p1Score  : onlineResult.p2Score;
+            const oppScore = onlinePlayer === 1 ? onlineResult.p2Score  : onlineResult.p1Score;
+            const myHp     = onlinePlayer === 1 ? onlineResult.p1Hearts : onlineResult.p2Hearts;
+            const oppHp    = onlinePlayer === 1 ? onlineResult.p2Hearts : onlineResult.p1Hearts;
+            const iWin  = myScore > oppScore;
+            const iLose = oppScore > myScore;
+            const tie   = myScore === oppScore;
+            const accent = iWin ? "#FFE44D" : iLose ? "#FF69B4" : "#888";
+            return (
+              <>
+                <div style={{ fontSize: 44 }}>{tie ? "🤝" : "🏆"}</div>
+                <div style={{ color: accent, fontSize: "clamp(16px,4vw,26px)", letterSpacing: "0.2em", textShadow: `0 0 16px ${accent}` }}>
+                  {tie ? "IT'S A TIE!" : iWin ? "YOU WIN!" : "OPPONENT WINS!"}
+                </div>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
+                  {[
+                    { label: "YOU",      sc: myScore,  hp: myHp,  color: "#FFE44D", img: myImg,  isWinner: iWin  },
+                    { label: "OPPONENT", sc: oppScore, hp: oppHp, color: "#FF69B4", img: oppImg, isWinner: iLose },
+                  ].map(p => (
+                    <div key={p.label} style={{
+                      width: "clamp(120px,26vw,170px)", padding: "16px 12px",
+                      background: p.isWinner ? `${p.color}18` : "#0a0008",
+                      border: `3px solid ${p.isWinner ? p.color : "#482D40"}`,
+                      boxShadow: p.isWinner ? `0 0 24px ${p.color}55` : "none",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
+                    }}>
+                      <div style={{ position: "relative", width: 52, height: 68 }}>
+                        <Image src={p.img} alt={p.label} fill className="object-contain pixelated" />
+                      </div>
+                      <div style={{ color: p.color, fontSize: "7px", letterSpacing: "0.15em" }}>{p.label}</div>
+                      <div style={{ color: p.isWinner ? p.color : "#aaa", fontSize: "20px" }}>
+                        {p.sc}<span style={{ fontSize: "11px", color: "#555" }}>/{onlineResult.total}</span>
+                      </div>
+                      <div style={{ color: "#FF4444", fontSize: "10px" }}>
+                        {"♥".repeat(Math.max(0, p.hp))}{"♡".repeat(Math.max(0, 3 - p.hp))}
+                      </div>
+                      {p.isWinner && !tie && <div style={{ color: p.color, fontSize: "7px" }}>★ WINNER ★</div>}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                  <Link href="/game" style={{
+                    padding: "12px 18px", fontSize: "8px", fontFamily: "'Press Start 2P',monospace",
+                    background: "#0d0020", border: `2px solid ${meta.color}`,
+                    color: meta.color, textDecoration: "none", letterSpacing: "0.1em",
+                  }}>◀ MAP</Link>
+                  <Link href="/wardrobe" style={{
+                    padding: "12px 18px", fontSize: "8px", fontFamily: "'Press Start 2P',monospace",
+                    background: "linear-gradient(180deg,#4A043A,#100008)", border: "3px solid #C060FF",
+                    color: "#E8B0FF", textDecoration: "none", letterSpacing: "0.1em",
+                    boxShadow: "0 0 14px rgba(192,96,255,0.4)",
+                  }}>↺ PLAY AGAIN</Link>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Bottom bar */}
       <div className="relative z-10 h-8 flex items-center justify-center shrink-0" style={{ background: "#0d0020", borderTop: `2px solid ${meta.color}44` }}>

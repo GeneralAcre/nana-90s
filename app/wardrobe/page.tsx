@@ -1,6 +1,7 @@
 "use client";
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 
@@ -151,7 +152,8 @@ function SmallBadge({ label }: { label: string }) {
 }
 
 export default function WardrobePage() {
-  const { setSuitColor } = useGame();
+  const router = useRouter();
+  const { setSuitColor, setPlayerCount, setRoomCode, setOnlinePlayer } = useGame();
   const [activeIndex, setActiveIndex] = useState(0);
   const [animKey,     setAnimKey]     = useState(0);
   const [playing,     setPlaying]     = useState(false);
@@ -383,82 +385,97 @@ export default function WardrobePage() {
 
       {/* ── SELECTION STRIP ── */}
       <div
-        className="relative z-10 shrink-0 flex items-center gap-3 md:gap-4 px-4 md:px-6"
+        className="relative z-10 shrink-0 flex flex-col px-4 md:px-6 py-2 gap-2"
         style={{
-          height:     'clamp(100px, 14vh, 140px)',
           background: 'linear-gradient(180deg, rgba(10,0,8,0.94), rgba(5,0,4,0.99))',
           borderTop:  `2px solid ${T.darkMauve}`,
         }}
       >
-        {/* Cards — scrollable on small screens */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 overflow-x-auto pb-1 no-scrollbar">
-          {characters.map((c, i) => {
-            const isActive = i === activeIndex;
-            const cardW    = 'clamp(68px, 8vw, 100px)';
-            const portH    = 'clamp(55px, 7.5vh, 84px)';
-            return (
-              <button
-                key={c.name}
-                onClick={() => handleSelect(i)}
-                className="flex flex-col items-center transition-all duration-200 shrink-0"
-                style={{
-                  width:      cardW,
-                  padding:    'clamp(3px, 0.4vw, 6px) clamp(3px, 0.4vw, 6px) clamp(4px, 0.5vw, 8px)',
-                  background: isActive
-                    ? 'linear-gradient(180deg, #2a0018, #180010)'
-                    : 'linear-gradient(180deg, #140010, #0c0008)',
-                  border:     `3px solid ${isActive ? T.gold : T.darkMauve}`,
-                  boxShadow:  isActive ? `0 0 18px ${T.gold}55, 0 -3px 0 ${T.gold}` : 'none',
-                  transform:  isActive ? 'translateY(-6px) scale(1.05)' : 'translateY(0) scale(1)',
-                }}
-              >
-                <div
-                  className="relative w-full"
+        {/* Character cards row */}
+        <div className="flex items-center gap-3">
+          {/* Cards */}
+          <div className="flex items-center gap-2 flex-1 overflow-x-auto pb-1 no-scrollbar">
+            {characters.map((c, i) => {
+              const isActive = i === activeIndex;
+              const cardW    = 'clamp(56px, 7vw, 84px)';
+              const portH    = 'clamp(42px, 6vh, 64px)';
+              return (
+                <button
+                  key={c.name}
+                  onClick={() => handleSelect(i)}
+                  className="flex flex-col items-center transition-all duration-200 shrink-0"
                   style={{
-                    height:     portH,
-                    background: '#080006',
-                    border:     `1px solid ${isActive ? T.gold + '80' : T.darkMauve}`,
+                    width:      cardW,
+                    padding:    '3px 3px 4px',
+                    background: isActive ? 'linear-gradient(180deg, #2a0018, #180010)' : 'linear-gradient(180deg, #140010, #0c0008)',
+                    border:     `3px solid ${isActive ? T.gold : T.darkMauve}`,
+                    boxShadow:  isActive ? `0 0 14px ${T.gold}55, 0 -3px 0 ${T.gold}` : 'none',
+                    transform:  isActive ? 'translateY(-4px) scale(1.05)' : 'none',
                   }}
                 >
-                  <Image
-                    src={c.img}
-                    alt={c.name}
-                    fill
-                    className="object-contain object-bottom"
-                    style={{ imageRendering: 'pixelated', padding: '2px' }}
-                  />
-                </div>
-                <span
-                  className="mt-1 font-black uppercase leading-tight text-center block truncate w-full"
-                  style={{
-                    fontSize:   'clamp(6px, 0.65vw, 8px)',
-                    color:      isActive ? T.gold : '#8A5070',
-                    textShadow: isActive ? `0 0 6px ${T.gold}` : 'none',
-                  }}
-                >
-                  {c.name.toUpperCase()}
-                </span>
-              </button>
-            );
-          })}
+                  <div className="relative w-full" style={{ height: portH, background: '#080006', border: `1px solid ${isActive ? T.gold + '80' : T.darkMauve}` }}>
+                    <Image src={c.img} alt={c.name} fill className="object-contain object-bottom" style={{ imageRendering: 'pixelated', padding: '2px' }} />
+                  </div>
+                  <span className="mt-1 font-black uppercase leading-tight text-center block truncate w-full"
+                    style={{ fontSize: 'clamp(5px, 0.6vw, 7px)', color: isActive ? T.gold : '#8A5070', textShadow: isActive ? `0 0 6px ${T.gold}` : 'none' }}>
+                    {c.name.toUpperCase()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* START GAME */}
-        <Link
-          href="/game"
-          className="font-black uppercase tracking-widest transition-all hover:brightness-110 active:translate-y-0.5 shrink-0"
-          style={{
-            fontSize:   'clamp(8px, 0.85vw, 11px)',
-            padding:    'clamp(8px, 1.2vh, 14px) clamp(12px, 1.8vw, 24px)',
-            background: `linear-gradient(180deg, ${T.deepPurple}, #100008)`,
-            border:     '3px solid #C060FF',
-            color:      '#E8B0FF',
-            boxShadow:  '0 0 18px rgba(192,96,255,0.4), 3px 3px 0 #0a0010',
-            textShadow: '0 0 8px #C060FF',
-          }}
-        >
-          START GAME
-        </Link>
+        {/* Action buttons row */}
+        <div className="flex items-center justify-center gap-3">
+          {/* 1 PLAYER */}
+          <Link
+            href="/game"
+            onClick={() => {
+              setPlayerCount(1);
+              setRoomCode(null);
+              setOnlinePlayer(null);
+            }}
+            className="font-black uppercase tracking-widest transition-all hover:brightness-110 active:translate-y-0.5"
+            style={{
+              fontSize:   'clamp(7px, 0.85vw, 10px)',
+              padding:    'clamp(8px, 1.2vh, 14px) clamp(10px, 1.5vw, 20px)',
+              background: `linear-gradient(180deg, ${T.deepPurple}, #100008)`,
+              border:     '3px solid #C060FF',
+              color:      '#E8B0FF',
+              boxShadow:  '0 0 18px rgba(192,96,255,0.4), 3px 3px 0 #0a0010',
+              textShadow: '0 0 8px #C060FF',
+              textDecoration: 'none',
+            }}
+          >
+            ▶ 1 PLAYER
+          </Link>
+
+          <span style={{ color: '#482D40', fontSize: 'clamp(8px,1vw,12px)' }}>·</span>
+
+          {/* 2P ONLINE */}
+          <button
+            onClick={() => {
+              setRoomCode(null);
+              setOnlinePlayer(null);
+              router.push('/online');
+            }}
+            className="font-black uppercase tracking-widest transition-all hover:brightness-110 active:translate-y-0.5"
+            style={{
+              fontSize:   'clamp(7px, 0.85vw, 10px)',
+              padding:    'clamp(8px, 1.2vh, 14px) clamp(10px, 1.5vw, 20px)',
+              background: `linear-gradient(180deg, #003020, #001008)`,
+              border:     `3px solid ${T.gold}`,
+              color:      T.gold,
+              boxShadow:  `0 0 18px ${T.gold}44, 3px 3px 0 #2a1800`,
+              textShadow: `0 0 8px ${T.gold}`,
+              cursor:     'pointer',
+              fontFamily: "'Press Start 2P', monospace",
+            }}
+          >
+            ⚡ 2P ONLINE
+          </button>
+        </div>
       </div>
 
     </div>
