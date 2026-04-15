@@ -325,7 +325,7 @@ export default function GamePage() {
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               style={{ opacity: 0.04 }}
             >
-              <span className="floor-watermark" style={{ fontSize: "160px", color: P.gold, fontWeight: 900 }}>
+              <span className="floor-watermark" style={{ fontSize: "clamp(72px,20vw,160px)", color: P.gold, fontWeight: 900 }}>
                 {activeFloor}F
               </span>
             </div>

@@ -257,7 +257,7 @@ export default function OnlinePage() {
               <div style={{ fontSize: "clamp(9px,1.1vw,12px)", color: T.gold, letterSpacing: "0.2em" }}>
                 CREATE ROOM
               </div>
-              <div style={{ fontSize: "clamp(7px,0.85vw,10px)", color: "#888", letterSpacing: "0.1em", textAlign: "center", lineHeight: 2 }}>
+              <div style={{ fontSize: "clamp(8px,0.85vw,10px)", color: "#888", letterSpacing: "0.1em", textAlign: "center", lineHeight: 2 }}>
                 START A ROOM AND SHARE<br />THE CODE WITH A FRIEND
               </div>
               <button
@@ -298,7 +298,7 @@ export default function OnlinePage() {
               <div style={{ fontSize: "clamp(9px,1.1vw,12px)", color: T.purple, letterSpacing: "0.2em" }}>
                 JOIN ROOM
               </div>
-              <div style={{ fontSize: "clamp(7px,0.85vw,10px)", color: "#888", letterSpacing: "0.1em", textAlign: "center", lineHeight: 2 }}>
+              <div style={{ fontSize: "clamp(8px,0.85vw,10px)", color: "#888", letterSpacing: "0.1em", textAlign: "center", lineHeight: 2 }}>
                 ENTER YOUR FRIEND&apos;S<br />4-LETTER CODE
               </div>
 
