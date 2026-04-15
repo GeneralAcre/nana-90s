@@ -232,10 +232,15 @@ export default function LandingPage() {
 
       {/* ── BUTTON ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <Link href="/wardrobe" style={{ textDecoration: "none" }}>
+        <Link href="/story" style={{ textDecoration: "none" }}>
           <div className="coin-btn" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", background: "rgba(0,0,0,0.85)", border: "3px solid #FFE44D", boxShadow: "4px 4px 0 #7a5800", cursor: "pointer" }}>
             <span style={{ color: "#FFE44D", fontSize: "10px", letterSpacing: "0.3em" }}>฿ INSERT COIN</span>
             <span style={{ color: "#FF69B4", fontSize: "10px", letterSpacing: "0.3em" }}><Blink>&amp; PRESS START</Blink></span>
+          </div>
+        </Link>
+        <Link href="/tips" style={{ textDecoration: "none", marginTop: 14 }}>
+          <div style={{ fontSize: "8px", color: "#ffffff55", letterSpacing: "0.2em", cursor: "pointer", padding: "6px 16px", border: "1px solid #ffffff22" }}>
+            💡 HOW TO TELL THE DIFFERENCE
           </div>
         </Link>
       </div>
