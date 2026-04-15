@@ -238,6 +238,11 @@ export default function LandingPage() {
             <span style={{ color: "#FF69B4", fontSize: "10px", letterSpacing: "0.3em" }}><Blink>&amp; PRESS START</Blink></span>
           </div>
         </Link>
+        <Link href="/tips" style={{ textDecoration: "none", marginTop: 12 }}>
+          <div style={{ fontSize: "8px", color: "#FF69B4aa", letterSpacing: "0.2em", cursor: "pointer", padding: "6px 16px", border: "1px solid #FF69B433", textAlign: "center" }}>
+            TIPS &amp; TRICK
+          </div>
+        </Link>
       </div>
 
       {/* ── FOOTER ── */}
@@ -245,13 +250,9 @@ export default function LandingPage() {
         <div style={{ textAlign: "center", padding: "8px 20px 4px", fontSize: "8px", color: "#ffffff99", letterSpacing: "0.25em" }}>
           INSPIRED BY NANA PLAZA · SUKHUMVIT SOI 4 · BANGKOK
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 20px 12px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 20px 12px" }}>
           <span style={{ color: "#ffffff55", fontSize: "8px" }}>© 2026 SOI4 GAMES</span>
-          <Link href="/tips" style={{ textDecoration: "none" }}>
-            <span style={{ color: "#FF69B4", fontSize: "8px", letterSpacing: "0.15em", borderBottom: "1px solid #FF69B455" }}>
-              TIPS &amp; TRICK
-            </span>
-          </Link>
+          <span style={{ color: "#FF69B4", fontSize: "8px" }}><Blink ms={1100}>▶ PLAYER 1</Blink></span>
           <span style={{ color: "#ffffff55", fontSize: "8px" }}>BKK_SOI_4</span>
         </div>
       </div>
