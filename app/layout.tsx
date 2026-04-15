@@ -1,4 +1,5 @@
 import "./globals.css";
+import Script from "next/script";
 import ClientWrapper from "./component/ClientWrapper";
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black overflow-hidden font-mono text-white antialiased">
+        <Script src="https://vibejam.cc/2026/widget.js" strategy="afterInteractive" />
         <ClientWrapper>
           {children}
         </ClientWrapper>
