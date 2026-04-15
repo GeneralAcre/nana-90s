@@ -240,7 +240,7 @@ export default function LandingPage() {
         </Link>
         <Link href="/tips" style={{ textDecoration: "none", marginTop: 14 }}>
           <div style={{ fontSize: "8px", color: "#ffffff55", letterSpacing: "0.2em", cursor: "pointer", padding: "6px 16px", border: "1px solid #ffffff22" }}>
-            💡 HOW TO TELL THE DIFFERENCE
+            HOW TO TELL THE DIFFERENCE
           </div>
         </Link>
       </div>

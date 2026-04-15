@@ -255,7 +255,7 @@ export default function StoryPage() {
                 fontFamily: "'Press Start 2P', monospace",
               }}
             >
-              💡 TIPS FIRST
+              TIPS FIRST
             </Link>
           </div>
           <Link href="/" style={{ fontSize: "7px", color: "#ffffff33", letterSpacing: "0.2em", textDecoration: "none", marginTop: 8 }}>
