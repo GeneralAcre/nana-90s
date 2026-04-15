@@ -131,7 +131,7 @@ export default function LandingPage() {
         fontFamily: "'Press Start 2P', 'Courier New', monospace",
         color: "#fff",
         background: "rgba(0,0,0,0.55)",
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       {/* ── TOP HUD ── */}
@@ -163,13 +163,13 @@ export default function LandingPage() {
       </div>
 
       {/* ── TITLE ── */}
-      <div style={{ textAlign: "center", padding: "30px 16px 8px", flexShrink: 0 }}>
-        <div style={{ 
-            fontSize: "clamp(36px, 5vw, 48px)", 
+      <div style={{ textAlign: "center", padding: "clamp(10px,3vh,30px) 16px 8px", flexShrink: 0 }}>
+        <div style={{
+            fontSize: "clamp(28px, 5vw, 48px)",
             letterSpacing: "0.05em",
             display: "flex",
             justifyContent: "center",
-            gap: "20px",
+            gap: "clamp(8px,2vw,20px)",
             flexWrap: "wrap"
         }}>
           <span style={{ color: "#FFE44D", textShadow: "4px 4px 0 #b87800" }}>GIRL</span>
@@ -178,11 +178,11 @@ export default function LandingPage() {
 
         <div style={{
             display: "inline-block",
-            margin: "15px 0",
+            margin: "clamp(8px,1.5vh,15px) 0",
             padding: "6px clamp(10px, 4vw, 24px)",
             background: "#FF69B4",
             color: "#000",
-            fontSize: "clamp(10px, 3.5vw, 20px)",
+            fontSize: "clamp(8px, 3.5vw, 20px)",
             boxShadow: "3px 3px 0 #8B0057",
             letterSpacing: "0.1em",
             maxWidth: "90vw",
