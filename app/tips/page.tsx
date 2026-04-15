@@ -75,8 +75,8 @@ const MYTHS = [
 export default function TipsPage() {
   return (
     <div
-      className="relative min-h-dvh w-screen overflow-x-hidden"
-      style={{ fontFamily: "'Press Start 2P', monospace", background: "#08000f", color: "#fff" }}
+      style={{ fontFamily: "'Press Start 2P', monospace", background: "#08000f", color: "#fff",
+        position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", zIndex: 30 }}
     >
       {/* Scanlines */}
       <div className="fixed inset-0 pointer-events-none z-10 opacity-[0.07]"
