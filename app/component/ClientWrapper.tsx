@@ -117,7 +117,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       <MusicController />
 
       {/* UI Pages */}
-      <div className="relative z-20 w-screen h-screen pointer-events-auto">
+      <div className="relative z-20 w-screen h-screen overflow-y-auto pointer-events-auto">
         {children}
       </div>
 

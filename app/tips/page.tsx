@@ -90,7 +90,7 @@ export default function TipsPage() {
         </Link>
         <div style={{ fontSize: "clamp(10px,1.4vw,15px)", color: "#FFE44D", letterSpacing: "0.25em",
           textShadow: "0 0 12px #FFB800, 2px 2px 0 #5A2A00" }}>
-          FIELD GUIDE
+          TIPS & TRICK
         </div>
         <Link href="/wardrobe" style={{ fontSize: "clamp(7px,1vw,10px)", color: "#FF69B4", letterSpacing: "0.1em", textDecoration: "none" }}>
           PLAY ▶
