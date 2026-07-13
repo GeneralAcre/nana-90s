@@ -139,7 +139,7 @@ export default function StoryPage() {
         <button
           onClick={e => { e.stopPropagation(); setAllDone(true); }}
           className="absolute top-4 right-5 z-20"
-          style={{ fontSize: "8px", color: "#ffffff44", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.2em" }}
+          style={{ fontSize: "8px", color: "#ffffff", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.2em" }}
         >
           SKIP ▶▶
         </button>
@@ -245,11 +245,11 @@ export default function StoryPage() {
             <Link
               href="/tips"
               style={{
-                fontSize:   "clamp(8px,1vw,11px)",
-                padding:    "14px 24px",
+                fontSize:   "clamp(10px,1.4vw,14px)",
+                padding:    "16px 36px",
                 background: "transparent",
-                border:     "2px solid #FFE44D55",
-                color:      "#FFE44D88",
+                border:     "3px solid #FFE44D",
+                color:      "#FFE44D",
                 textDecoration: "none",
                 letterSpacing: "0.2em",
                 fontFamily: "'Press Start 2P', monospace",
@@ -258,7 +258,7 @@ export default function StoryPage() {
               TIPS FIRST
             </Link>
           </div>
-          <Link href="/" style={{ fontSize: "7px", color: "#ffffff33", letterSpacing: "0.2em", textDecoration: "none", marginTop: 8 }}>
+          <Link href="/" style={{ fontSize: "9px", color: "#ffffff", letterSpacing: "0.2em", textDecoration: "none", marginTop: 8 }}>
             ◀ BACK
           </Link>
         </div>

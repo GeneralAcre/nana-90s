@@ -250,11 +250,6 @@ export default function LandingPage() {
         <div style={{ textAlign: "center", padding: "8px 12px 4px", fontSize: "clamp(6px,1.8vw,8px)", color: "#ffffff99", letterSpacing: "0.2em" }}>
           INSPIRED BY NANA PLAZA · SUKHUMVIT SOI 4 · BANGKOK
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 6px", flexWrap: "wrap", gap: "4px" }}>
-          <span style={{ color: "#ffffff55", fontSize: "clamp(6px,1.8vw,8px)" }}>© 2026 SOI4 GAMES</span>
-          <span style={{ color: "#FF69B4", fontSize: "clamp(6px,1.8vw,8px)" }}><Blink ms={1100}>▶ PLAYER 1</Blink></span>
-          <span style={{ color: "#ffffff55", fontSize: "clamp(6px,1.8vw,8px)" }}>BKK_SOI_4</span>
-        </div>
         <div style={{ textAlign: "center", padding: "2px 12px 10px", fontSize: "clamp(6px,1.6vw,7px)", color: "#ffffff33", letterSpacing: "0.15em" }}>
           BUILT BY SANPAPHAT PORNTONGPRASERT
         </div>
